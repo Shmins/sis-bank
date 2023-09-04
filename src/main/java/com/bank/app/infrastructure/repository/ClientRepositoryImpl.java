@@ -17,7 +17,7 @@ import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 public class ClientRepositoryImpl implements ClientRepository {
-    
+
     @Autowired
     private ClientRepository clientRepository;
 
@@ -48,7 +48,8 @@ public class ClientRepositoryImpl implements ClientRepository {
 
     @Override
     public List<Client> findAll() {
-        return this.clientRepository.findAll();
+        throw new UnsupportedOperationException("Método não encontrado 'findAll'");
+
     }
 
     @Override
@@ -157,10 +158,8 @@ public class ClientRepositoryImpl implements ClientRepository {
     }
 
     @Override
-    public Card findByCard(String number) {
-        return this.findByCard(number);
+    public Client findByCard(String number) {
+        return this.clientRepository.findByCard(number);
     }
-
-   
 
 }
