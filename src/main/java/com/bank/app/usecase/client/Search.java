@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 @Service
@@ -33,7 +32,7 @@ public class Search {
     public List<Client> getClientByNameComplete(String nameComplete){
         return this.clientRepository.findByNameComplete(nameComplete);
     }
-     public Card getCardClient(String number) {
+     public Client getCardClient(String number) {
         return this.clientRepository.findByCard(number);
     }
 }

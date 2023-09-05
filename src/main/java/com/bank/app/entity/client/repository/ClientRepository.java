@@ -9,9 +9,6 @@ import java.util.List;
 import com.bank.app.entity.client.model.cardmodel.Card;
 
 
-
-
-
 public interface ClientRepository extends MongoRepository<Client, String>{
     UserDetails findByCpf(String cpf);
     List<Client> findByEmail(String email);
