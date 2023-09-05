@@ -156,11 +156,6 @@ public class ClientRepositoryImpl implements ClientRepository {
         throw new UnsupportedOperationException("Unimplemented method 'findByNameComplete'");
     }
 
-    @Override
-    public Card findByCard(String number) {
-        return this.findByCard(number);
-    }
-
    
 
 }

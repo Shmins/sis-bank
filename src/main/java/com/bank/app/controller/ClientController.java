@@ -107,7 +107,7 @@ public class ClientController {
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/client/cards/cpf/{cpf}")
+    /* @GetMapping(value = "/client/cards/cpf/{cpf}")
     public ResponseEntity<?> getAllCardsByCpf(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientSearch.getClientById(cpf);
@@ -126,7 +126,7 @@ public class ClientController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
-    }
+    } */
 
     @GetMapping(value = "/client/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("email") String cpf) {
