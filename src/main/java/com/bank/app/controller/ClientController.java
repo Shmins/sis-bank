@@ -1,6 +1,7 @@
 package com.bank.app.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,7 @@ import com.bank.app.usecase.client.Update;
 @Controller
 @RestController
 @RequestMapping("client/v1")
+@CrossOrigin(origins = "*")
 public class ClientController {
 
     @Autowired
@@ -58,7 +61,7 @@ public class ClientController {
                     data.getNameComplete(),
                     data.getEmail(),
                     data.getPassword(),
-                    data.getAccount(),
+                    data.getTypeAccount(),
                     data.getPhone(),
                     data.getAddress());
             Client result = this.clientCreate.createClient(client);
@@ -71,21 +74,21 @@ public class ClientController {
     }
 
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")
-    public ResponseEntity<?> saveCards(@RequestBody List<Card> data, @PathVariable("cpf") String cpf) {
+    public ResponseEntity<?> saveCards(@RequestBody Card data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientSearch.getClientById(cpf);
             if (client.getCards().size() == 6) {
                 throw new GenericException("limite de cartões exedido");
             }
-            List<Card> cards = client.getCards().isEmpty() ? data : client.getCards();
+            List<Card> cards = client.getCards().isEmpty() ? new ArrayList<>() : client.getCards();
 
             for (int i = 0; i < client.getCards().size(); i++) {
-                if (client.getCards().get(i).getNumberCard().equals(data.get(0).getNumberCard())
-                        || client.getCards().get(i).getCvc() == data.get(0).getCvc()) {
+                if (client.getCards().get(i).getNumberCard().equals(data.getNumberCard())
+                        || client.getCards().get(i).getCvc() == data.getCvc()) {
                     throw new GenericException("Número de cartão ou cvc duplicado");
                 }
             }
-            cards.add(data.get(0));
+            cards.add(data);
 
             client.setCards(cards);
             Client result = this.clientUpdate.updateClient(client);
@@ -212,7 +215,7 @@ public class ClientController {
             client.setEmail(data.getEmail() != null ? data.getEmail() : client.getEmail());
             client.setCpf(data.getEmail() != null ? data.getCpf() : client.getCpf());
             client.setPhone(data.getPhone() != null ? data.getPhone() : client.getPhone());
-            client.setAccount(data.getAccount() != null ? data.getAccount() : client.getAccount());
+            client.setTypeAccount(data.getTypeAccount() != null ? data.getTypeAccount() : client.getTypeAccount());
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
             client.setUpdateAt(LocalDateTime.now());
 

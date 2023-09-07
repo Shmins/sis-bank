@@ -4,67 +4,60 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.cardmodel.Card;
-import com.bank.app.entity.client.repository.ClientRepository;
+import com.bank.app.entity.client.model.Account;
+import com.bank.app.entity.client.repository.AccountRepository;
 
-public class ClientRepositoryImpl implements ClientRepository {
-
-    @Autowired
-    private ClientRepository clientRepository;
+public class AccountRepositoryImpl implements AccountRepository{
 
     @Override
-    public <S extends Client> S insert(S entity) {
+    public <S extends Account> S insert(S entity) {
         throw new UnsupportedOperationException("Método não encontrado 'insert'");
     }
 
     @Override
-    public <S extends Client> List<S> insert(Iterable<S> entities) {
+    public <S extends Account> List<S> insert(Iterable<S> entities) {
         throw new UnsupportedOperationException("Método não encontrado 'insert'");
     }
 
     @Override
-    public <S extends Client> List<S> findAll(Example<S> example) {
+    public <S extends Account> List<S> findAll(Example<S> example) {
         throw new UnsupportedOperationException("Método não encontrado 'findAll' com exemplo");
     }
 
     @Override
-    public <S extends Client> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Account> List<S> findAll(Example<S> example, Sort sort) {
         throw new UnsupportedOperationException("Método não encontrado 'findAll' com classificador");
     }
 
     @Override
-    public <S extends Client> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Account> List<S> saveAll(Iterable<S> entities) {
         throw new UnsupportedOperationException("Método não encontrado 'saveAll'");
     }
 
     @Override
-    public List<Client> findAll() {
+    public List<Account> findAll() {
         throw new UnsupportedOperationException("Método não encontrado 'findAll'");
-
     }
 
     @Override
-    public List<Client> findAllById(Iterable<String> ids) {
+    public List<Account> findAllById(Iterable<String> ids) {
         throw new UnsupportedOperationException("Método não encontrado 'findAllById'");
     }
 
     @Override
-    public <S extends Client> S save(S entity) {
+    public <S extends Account> S save(S entity) {
         throw new UnsupportedOperationException("Método não encontrado 'save'");
     }
 
     @Override
-    public Optional<Client> findById(String id) {
-        return this.clientRepository.findById(id);
+    public Optional<Account> findById(String id) {
+        throw new UnsupportedOperationException("Método não encontrado 'findById'");
     }
 
     @Override
@@ -83,7 +76,7 @@ public class ClientRepositoryImpl implements ClientRepository {
     }
 
     @Override
-    public void delete(Client entity) {
+    public void delete(Account entity) {
         throw new UnsupportedOperationException("Método não encontrado 'delete'");
     }
 
@@ -93,7 +86,7 @@ public class ClientRepositoryImpl implements ClientRepository {
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Client> entities) {
+    public void deleteAll(Iterable<? extends Account> entities) {
         throw new UnsupportedOperationException("Método não encontrado 'deleteAll'");
     }
 
@@ -103,63 +96,38 @@ public class ClientRepositoryImpl implements ClientRepository {
     }
 
     @Override
-    public List<Client> findAll(Sort sort) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll' somente com classificador");
+    public List<Account> findAll(Sort sort) {
+        throw new UnsupportedOperationException("Método não encontrado 'findAll' com somente classificador");
     }
 
     @Override
-    public Page<Client> findAll(Pageable pageable) {
+    public Page<Account> findAll(Pageable pageable) {
         throw new UnsupportedOperationException("Método não encontrado 'findAll' com paginação");
     }
 
     @Override
-    public <S extends Client> Optional<S> findOne(Example<S> example) {
+    public <S extends Account> Optional<S> findOne(Example<S> example) {
         throw new UnsupportedOperationException("Método não encontrado 'findOne'");
     }
 
     @Override
-    public <S extends Client> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Account> Page<S> findAll(Example<S> example, Pageable pageable) {
         throw new UnsupportedOperationException("Método não encontrado 'findAll'");
     }
 
     @Override
-    public <S extends Client> long count(Example<S> example) {
+    public <S extends Account> long count(Example<S> example) {
         throw new UnsupportedOperationException("Método não encontrado 'count'");
     }
 
     @Override
-    public <S extends Client> boolean exists(Example<S> example) {
+    public <S extends Account> boolean exists(Example<S> example) {
         throw new UnsupportedOperationException("Método não encontrado 'exists'");
     }
 
     @Override
-    public <S extends Client, R> R findBy(Example<S> example, Function<FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends Account, R> R findBy(Example<S> example, Function<FetchableFluentQuery<S>, R> queryFunction) {
         throw new UnsupportedOperationException("Método não encontrado 'findBy'");
     }
-
-    @Override
-    public UserDetails findByCpf(String cpf) {
-        return this.clientRepository.findByCpf(cpf);
-    }
-
-    @Override
-    public List<Client> findByEmail(String email) {
-        throw new UnsupportedOperationException("Método não encontrado 'findByEmail'");
-    }
-
-    @Override
-    public List<Client> findByCards(List<Card> cards) {
-        throw new UnsupportedOperationException("Método não encontrado 'findByCards'");
-    }
-
-    @Override
-    public List<Client> findByNameComplete(String nameComplete) {
-        throw new UnsupportedOperationException("Método não encontrado 'findByNameComplete'");
-    }
-
-    @Override
-    public Client findByCard(String number) {
-        return this.clientRepository.findByCard(number);
-    }
-
+    
 }

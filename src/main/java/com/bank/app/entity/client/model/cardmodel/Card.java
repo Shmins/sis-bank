@@ -20,7 +20,6 @@ public class Card {
     @Indexed(unique = true)
     private int cvc;
 
-
     private TypeCard typeCard;
 
     private String nameComplete;
@@ -38,10 +37,12 @@ public class Card {
         if (cvc <= 100) {
             throw new IllegalArgumentException("CVC com formato errado");
         }
-        if (!numberCard.matches("\\d{4}\\d{4}\\d{4}\\d{4}")) {
-            throw new IllegalArgumentException("Número de cartão invalido");
+        if (!numberCard.matches("\\d{4}\\ \\d{4}\\ \\d{4}\\ \\d{4}")) {
+            throw new IllegalArgumentException("Número de cartão inválido");
         }
-        
+        if(!typeIssuer.equals("Visa") && !typeIssuer.equals("MasterCard") && !typeIssuer.equals("Elo") && !typeIssuer.equals("Hibercard")&& !typeIssuer.equals("American_Express")){
+            throw new IllegalArgumentException("Tipo de cartão inválido");
+        }
         this.nameComplete = nameComplete;
         this.typeCard = typeCard;
         this.typeIssuer = typeIssuer;

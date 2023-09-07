@@ -8,9 +8,11 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.exception.CpfException;
+import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import lombok.Data;
 
@@ -26,12 +28,14 @@ public class Client implements UserDetails {
 
     private String password;
 
-    private Account account;
+    private String typeAccount;
 
     private Phone phone;
 
     private Address address;
 
+    private BorrowedLimit borrowedLimit;
+    
     private List<Card> cards = new ArrayList<>();
 
     private String role;
@@ -40,21 +44,26 @@ public class Client implements UserDetails {
 
     private LocalDateTime updateAt;
 
-    public Client(String cpf, String nameComplete, String email, String password, Account account, Phone phone,
+    public Client(String cpf, String nameComplete, String email, String password, String typeAccount, Phone phone,
             Address address) {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
+        }
+         if(!typeAccount.equals("chain") && !typeAccount.equals("savings")){
+            throw new GenericException("Tipo de conta inválido");
         }
         this.cpf = cpf;
         this.nameComplete = nameComplete;
         this.email = email;
         this.password = password;
-        this.account = account;
+        this.typeAccount = typeAccount;
+         
         this.phone = phone;
         this.address = address;
         this.role = "ROLE_CLIENT";
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
+        this.borrowedLimit = new BorrowedLimit(0, 100000);
     }
 
     @Override
