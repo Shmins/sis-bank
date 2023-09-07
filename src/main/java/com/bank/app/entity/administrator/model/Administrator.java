@@ -1,11 +1,9 @@
-package com.bank.app.entity.client.model;
+package com.bank.app.entity.administrator.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,91 +11,75 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.exception.CpfException;
 import com.bank.app.entity.client.exception.GenericException;
-import com.bank.app.entity.client.model.cardmodel.Card;
-import lombok.Data;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Data
-@Document(collection = "client")
-public class Client implements UserDetails {
-    @Id
+@Document(collection = "Administrator")
+public class Administrator implements UserDetails{
+    
     private String cpf;
 
-    private String nameComplete;
-
-    private String email;
+    private String rg;
 
     private String password;
 
-    private String typeAccount;
+    private String nameComplete;
 
-    private Phone phone;
-
-    private Address address;
-
-    private BorrowedLimit borrowedLimit;
-    
-    private List<Card> cards = new ArrayList<>();
+    private String bankAgency;
 
     private String role;
-    
+
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
 
-    public Client(String cpf, String nameComplete, String email, String password, String typeAccount, Phone phone,
-            Address address) {
+    public Administrator(String cpf, String rg, String nameComplete, String password, String bankAgency) {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
-         if(!typeAccount.equals("chain") && !typeAccount.equals("savings")){
-            throw new GenericException("Tipo de conta inválido");
+
+        if (rg.matches("\\d{10}\\-\\d")) {
+            throw new GenericException("RG com formato inválido");
         }
         this.cpf = cpf;
         this.nameComplete = nameComplete;
-        this.email = email;
         this.password = password;
-        this.typeAccount = typeAccount;
-         
-        this.phone = phone;
-        this.address = address;
-        this.role = "ROLE_CLIENT";
+        this.bankAgency = bankAgency;
+        this.role = "ROLE_ADM";
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
-        this.borrowedLimit = new BorrowedLimit(0, 100000);
     }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role));
     }
-
     @Override
     public String getPassword() {
-        return password;
+        return this.password;
     }
-
     @Override
     public String getUsername() {
-        return cpf;
+       return this.cpf;
     }
-
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+      return true;
     }
-
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+       return true;
     }
-
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+       return true;
     }
-
     @Override
     public boolean isEnabled() {
-        return true;
+       return true;
     }
 }

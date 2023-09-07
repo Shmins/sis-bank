@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +24,8 @@ import com.bank.app.usecase.borrowing.BorrowingSearch;
 import com.bank.app.usecase.borrowing.BorrowingTdo;
 import com.bank.app.usecase.borrowing.BorrowingUpdate;
 
-
 @RestController
-@RequestMapping("client/v1/borrowing")
+@RequestMapping("borrowing/v1")
 @CrossOrigin(origins = "*")
 public class BorrowingController {
     @Autowired
@@ -48,7 +48,7 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getBorrowingAll() {
         try {
@@ -68,9 +68,9 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @PutMapping(value = "/{cpf}", produces = "application/json")
-    public ResponseEntity<?> updateById(@PathVariable("cpf") String id, @RequestBody BorrowingTdo data) {
+    public ResponseEntity<?> updateBorrowingById(@PathVariable("cpf") String id, @RequestBody BorrowingTdo data) {
         try {
             Borrowing borrowing = this.borrowingSearch.getBorrowingById(id);
 
@@ -89,11 +89,11 @@ public class BorrowingController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
-
-    @DeleteMapping(value = "/{cpf}")
-    public ResponseEntity<?> deleteById(@PathVariable("cpf") String cpf) {
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> deleteBorrowingById(@PathVariable("id") String id) {
         try {
-            this.borrowingDelete.deleteById(cpf);
+            this.borrowingDelete.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

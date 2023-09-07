@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 @Service
-public class Delete {
+public class ClientDelete {
     @Autowired
     private ClientRepository clientRepository;
 

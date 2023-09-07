@@ -7,7 +7,7 @@ import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 @Service
-public class Update {
+public class ClientUpdate {
     @Autowired
     private ClientRepository clientRepository;
 

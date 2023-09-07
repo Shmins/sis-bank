@@ -26,11 +26,14 @@ import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.infrastructure.token.TokenService;
+import com.bank.app.infrastructure.token.TokenUserTdo;
 import com.bank.app.usecase.client.ClientDto;
-import com.bank.app.usecase.client.Create;
-import com.bank.app.usecase.client.Delete;
-import com.bank.app.usecase.client.Search;
-import com.bank.app.usecase.client.Update;
+import com.bank.app.usecase.client.ClientCreate;
+import com.bank.app.usecase.client.ClientDelete;
+import com.bank.app.usecase.client.ClientSearch;
+import com.bank.app.usecase.client.ClientUpdate;
+
+import jakarta.annotation.security.RolesAllowed;
 
 @Controller
 @RestController
@@ -39,13 +42,13 @@ import com.bank.app.usecase.client.Update;
 public class ClientController {
 
     @Autowired
-    private Create clientCreate;
+    private ClientCreate clientCreate;
     @Autowired
-    private Search clientSearch;
+    private ClientSearch clientSearch;
     @Autowired
-    private Update clientUpdate;
+    private ClientUpdate clientUpdate;
     @Autowired
-    private Delete clientDelete;
+    private ClientDelete clientDelete;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -73,6 +76,7 @@ public class ClientController {
         }
     }
 
+    @RolesAllowed("CLIENT")
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")
     public ResponseEntity<?> saveCards(@RequestBody Card data, @PathVariable("cpf") String cpf) {
         try {
@@ -103,7 +107,6 @@ public class ClientController {
     @PostMapping(value = "/login", produces = "application/json")
     public ResponseEntity<?> loginClient(@RequestBody Login login) {
         try {
-
             var userAuthentication = new UsernamePasswordAuthenticationToken(
                     login.cpf(), login.password());
 
@@ -111,21 +114,20 @@ public class ClientController {
 
             var user = (Client) aut.getPrincipal();
 
-            String token = this.tokenService.token(user);
+            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
 
             return new ResponseEntity<>(token, HttpStatus.valueOf(200));
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(401));
+            return new ResponseEntity<>(e, HttpStatus.valueOf(401));
         }
     }
-
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAll() {
         List<Client> clients = this.clientSearch.getAll();
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
-   @GetMapping(value = "/client/cards/cpf/{cpf}")
+   @GetMapping(value = "/cards/cpf/{cpf}")
     public ResponseEntity<?> getAllCardsByCpf(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientSearch.getClientById(cpf);
@@ -148,7 +150,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/cpf/{cpf}")
-    public ResponseEntity<?> getById(@PathVariable("email") String cpf) {
+    public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientSearch.getClientById(cpf);
 

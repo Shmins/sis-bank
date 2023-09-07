@@ -13,7 +13,7 @@ import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 @Service
-public class Search {
+public class ClientSearch {
     @Autowired
     private ClientRepository clientRepository;
 

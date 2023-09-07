@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.repository.ClientRepository;
 @Service
-public class Create {
+public class ClientCreate {
     @Autowired
     private ClientRepository clientRepository;
 
