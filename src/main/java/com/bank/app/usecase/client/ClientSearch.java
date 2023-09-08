@@ -6,6 +6,7 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -21,7 +22,10 @@ public class ClientSearch {
         Optional<Client> client = this.clientRepository.findById(cpf);
         return client.isPresent() ? client.get() : null;
     }
-
+    public UserDetails getClientByCpf(String cpf) {
+       UserDetails client = this.clientRepository.findByCpf(cpf);
+        return client != null ? client : null;
+    }
     public List<Client> getAll() {
         return this.clientRepository.findAll();
     }

@@ -6,16 +6,24 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.bank.app.entity.client.repository.ClientRepository;
+import com.bank.app.usecase.client.ClientSearch;
+import com.bank.app.usecase.official.OfficialSearch;
 
 @Service
 public class ServiceClientLogin implements UserDetailsService {
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientSearch clientRepository;
+    @Autowired
+    private OfficialSearch officialRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return clientRepository.findByCpf(username);
+        if (clientRepository.getClientByCpf(username) == null) {
+            return officialRepository.getOfficialByCpf(username);
+        } else {
+
+            return clientRepository.getClientByCpf(username);
+        }
     }
 
 }

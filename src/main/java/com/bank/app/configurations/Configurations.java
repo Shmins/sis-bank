@@ -31,7 +31,7 @@ public class Configurations {
         String roleAdm = "ROLE_ADM";
         String roleBoss = "ROLE_BOSS";
 
-        http.csrf(csrf -> csrf.disable()) 
+        http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
@@ -40,6 +40,8 @@ public class Configurations {
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
                         .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
+                        .requestMatchers("official/v1/getAll").hasAnyAuthority(roleOfficial)
+
                         .anyRequest().permitAll())
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

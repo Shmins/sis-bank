@@ -1,6 +1,7 @@
 package com.bank.app.controller;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -92,15 +93,25 @@ public class OfficialController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Official clients = this.officialSearch.getOfficialById(cpf);
+            Official official = this.officialSearch.getOfficialById(cpf);
 
-            return new ResponseEntity<>(clients, HttpStatus.OK);
+            return new ResponseEntity<>(official, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
 
         }
     }
+    @GetMapping(value = "/getAll")
+    public ResponseEntity<?> getById() {
+        try {
+            List<Official> official = this.officialSearch.getAll();
 
+            return new ResponseEntity<>(official, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+
+        }
+    }
     @RolesAllowed("BOSS")
     @PutMapping(value = "/{id}", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")

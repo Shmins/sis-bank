@@ -6,6 +6,7 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.bank.app.entity.official.model.Official;
@@ -20,7 +21,10 @@ public class OfficialSearch {
         Optional<Official> client = this.officialRepository.findById(cpf);
         return client.isPresent() ? client.get() : null;
     }
-
+    public UserDetails getOfficialByCpf(String cpf) {
+       UserDetails client = this.officialRepository.findByCpf(cpf);
+        return client != null ? client : null;
+    }
     public List<Official> getAll() {
         return this.officialRepository.findAll();
     }
