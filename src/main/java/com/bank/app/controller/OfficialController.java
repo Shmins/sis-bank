@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,12 +27,15 @@ import com.bank.app.usecase.official.OfficialUpdate;
 
 import jakarta.annotation.security.RolesAllowed;
 
+import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.official.model.Official;
+import com.bank.app.infrastructure.token.TokenService;
+import com.bank.app.infrastructure.token.TokenUserTdo;
 
 @RestController
 @RequestMapping("official/v1")
 @CrossOrigin("*")
-@PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+
 public class OfficialController {
     @Autowired
     private OfficialCreate officialCreate;
@@ -40,8 +45,12 @@ public class OfficialController {
     private OfficialUpdate officialUpdate;
     @Autowired
     private OfficialDelete officialDelete;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenService tokenService;
 
-    @RolesAllowed("BOSS")
+   /*  @RolesAllowed("BOSS") */
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data) {
         try {
@@ -63,6 +72,23 @@ public class OfficialController {
         }
     }
 
+    @PostMapping(value = "/login", produces = "application/json")
+    public ResponseEntity<?> loginClient(@RequestBody Login login) {
+        try {
+            var userAuthentication = new UsernamePasswordAuthenticationToken(
+                    login.cpf(), login.password());
+
+            var aut = this.authenticationManager.authenticate(userAuthentication);
+
+            var user = (Official) aut.getPrincipal();
+
+            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getCpf(), user.getRole()));
+
+            return new ResponseEntity<>(token, HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.valueOf(401));
+        }
+    }
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
@@ -77,6 +103,7 @@ public class OfficialController {
 
     @RolesAllowed("BOSS")
     @PutMapping(value = "/{id}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody OfficialDto data) {
         try {
             Official official = this.officialSearch.getOfficialById(id);
@@ -100,13 +127,9 @@ public class OfficialController {
         }
     }
 
-    @PutMapping(value = "/approve/{id}")
-    public ResponseEntity<?> approvedById(@PathVariable("id") String id) {
-        return new ResponseEntity<>(HttpStatus.valueOf(200));
-    }
-
     @RolesAllowed("BOSS")
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.officialDelete.deleteById(id);

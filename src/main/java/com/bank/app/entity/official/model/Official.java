@@ -47,7 +47,7 @@ public class Official implements UserDetails {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
-        if (rg.matches("\\d{10}\\-\\d")) {
+        if (rg.length() != 11) {
             throw new GenericException("RG com formato inválido");
 
         }

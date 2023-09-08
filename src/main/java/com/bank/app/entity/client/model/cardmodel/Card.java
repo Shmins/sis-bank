@@ -40,7 +40,11 @@ public class Card {
         if (!numberCard.matches("\\d{4}\\ \\d{4}\\ \\d{4}\\ \\d{4}")) {
             throw new IllegalArgumentException("Número de cartão inválido");
         }
-        if(!typeIssuer.equals("Visa") && !typeIssuer.equals("MasterCard") && !typeIssuer.equals("Elo") && !typeIssuer.equals("Hibercard")&& !typeIssuer.equals("American_Express")){
+        if(!numberCard.substring(0, 2).equals("51") || !numberCard.substring(0, 2).equals("55") //MasterCard
+        && !numberCard.substring(0, 1).equals("4") //Visa
+        && !numberCard.substring(0, 2).equals("34") || !numberCard.substring(0, 2).equals("37") 
+        && !numberCard.substring(0, 1).equals("3")
+        && !numberCard.equals("American_Express")){
             throw new IllegalArgumentException("Tipo de cartão inválido");
         }
         this.nameComplete = nameComplete;

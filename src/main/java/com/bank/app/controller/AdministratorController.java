@@ -28,7 +28,7 @@ import com.bank.app.usecase.administrator.AdministratorUpdate;
 @RestController
 @RequestMapping("adm/v1/")
 @CrossOrigin("*")
-@PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+
 public class AdministratorController {
     @Autowired
     private AdministratorCreate administratorCreate;
@@ -40,6 +40,7 @@ public class AdministratorController {
     private AdministratorDelete administratorDelete;
 
     @PostMapping(value = "", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> saveAdministrator(@RequestBody AdministratorDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
@@ -58,7 +59,6 @@ public class AdministratorController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
@@ -72,6 +72,7 @@ public class AdministratorController {
     }
 
     @PutMapping(value = "/{id}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody AdministratorDto data) {
         try {
             Administrator adm = this.administratorSearch.getClientById(id);
@@ -92,12 +93,9 @@ public class AdministratorController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
-    @PutMapping(value = "/approve/{id}")
-    public ResponseEntity<?> approvedById(@PathVariable("id") String id){
-        return new ResponseEntity<>(HttpStatus.valueOf(200));
-    }
 
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.administratorDelete.deleteById(id);

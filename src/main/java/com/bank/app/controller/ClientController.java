@@ -114,7 +114,7 @@ public class ClientController {
 
             var user = (Client) aut.getPrincipal();
 
-            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
+            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getCpf(), user.getRole()));
 
             return new ResponseEntity<>(token, HttpStatus.valueOf(200));
         } catch (Exception e) {

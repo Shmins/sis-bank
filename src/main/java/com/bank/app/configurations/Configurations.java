@@ -40,8 +40,7 @@ public class Configurations {
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
                         .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
-                        .requestMatchers("offical/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
