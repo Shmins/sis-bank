@@ -18,7 +18,9 @@ public class BorrowingSearch {
         Optional<Borrowing> borrowing = this.borrowingRepository.findById(cpf);
         return borrowing.isPresent() ? borrowing.get() : null;
     }
-
+    public List<Borrowing> getAllForClient(String cpf){
+         return this.borrowingRepository.findAllByCpf(cpf);
+    }
     public List<Borrowing> getAll() {
         return this.borrowingRepository.findAll();
     }

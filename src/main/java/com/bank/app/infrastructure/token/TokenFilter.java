@@ -8,9 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.bank.app.entity.administrator.repository.AdministratorRepository;
-import com.bank.app.entity.client.repository.ClientRepository;
-import com.bank.app.entity.official.repository.OfficialRepository;
+import com.bank.app.usecase.administrator.AdministratorSearch;
+import com.bank.app.usecase.boss.BossSearch;
+import com.bank.app.usecase.client.ClientSearch;
+import com.bank.app.usecase.official.OfficialSearch;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,11 +23,13 @@ public class TokenFilter extends OncePerRequestFilter {
   @Autowired
   private TokenService tokenService;
   @Autowired
-  private ClientRepository clientRepository;
+  private ClientSearch clientRepository;
   @Autowired
-  private OfficialRepository officialRepository;
+  private OfficialSearch officialRepository;
   @Autowired
-  private AdministratorRepository administratorRepository;
+  private AdministratorSearch administratorRepository;
+  @Autowired
+  private BossSearch bossRepository;
 
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
@@ -38,20 +41,31 @@ public class TokenFilter extends OncePerRequestFilter {
       token = authorization.replace("Bearer", "");
       var subject = this.tokenService.getSubject(token);
       var role = this.tokenService.getIssuer(token);
-      var user = this.clientRepository.findByCpf(subject);
 
       switch (role) {
-
+        case ("ROLE_CLIENT"): {
+          var user = this.clientRepository.getClientByCpf(subject);
+          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+          SecurityContextHolder.getContext().setAuthentication(auth);
+          break;
+        }
         case ("ROLE_OFFICIAL"): {
-          logger.info("OFFICIAL");
-          user = this.officialRepository.findByCpf(subject);
+          var user = this.officialRepository.getOfficialByCpf(subject);
+          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+          SecurityContextHolder.getContext().setAuthentication(auth);
           break;
         }
         case ("ROLE_ADM"): {
-          user = this.administratorRepository.findByCpf(subject);
+          var user = this.administratorRepository.getAdmByCpf(subject);
+          
+          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+          SecurityContextHolder.getContext().setAuthentication(auth);
           break;
         }
         case ("ROLE_BOSS"): {
+          var user = this.bossRepository.getBossByCpf(subject);
+          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+          SecurityContextHolder.getContext().setAuthentication(auth);
           break;
         }
         default: {
@@ -59,8 +73,6 @@ public class TokenFilter extends OncePerRequestFilter {
         }
       }
 
-      var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-      SecurityContextHolder.getContext().setAuthentication(auth);
     }
     filterChain.doFilter(req, res);
   }

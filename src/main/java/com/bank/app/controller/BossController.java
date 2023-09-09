@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,47 +19,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bank.app.entity.administrator.model.Administrator;
+import com.bank.app.usecase.boss.BossCreate;
+import com.bank.app.usecase.boss.BossDelete;
+import com.bank.app.usecase.boss.BossDto;
+import com.bank.app.usecase.boss.BossSearch;
+import com.bank.app.usecase.boss.BossUpdate;
+
+
+import jakarta.annotation.security.RolesAllowed;
+
+import com.bank.app.entity.boss.model.Boss;
 import com.bank.app.entity.client.model.Login;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
-import com.bank.app.usecase.administrator.AdministratorCreate;
-import com.bank.app.usecase.administrator.AdministratorDelete;
-import com.bank.app.usecase.administrator.AdministratorDto;
-import com.bank.app.usecase.administrator.AdministratorSearch;
-import com.bank.app.usecase.administrator.AdministratorUpdate;
-
 
 @RestController
-@RequestMapping("adm/v1")
+@RequestMapping("boss/v1")
 @CrossOrigin("*")
 
-public class AdministratorController {
+public class BossController {
     @Autowired
-    private AdministratorCreate administratorCreate;
+    private BossCreate bossCreate;
     @Autowired
-    private AdministratorSearch administratorSearch;
+    private BossSearch bossSearch;
     @Autowired
-    private AdministratorUpdate administratorUpdate;
+    private BossUpdate bossUpdate;
     @Autowired
-    private AdministratorDelete administratorDelete;
+    private BossDelete bossDelete;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private TokenService tokenService;
+
+    @RolesAllowed("BOSS")
     @PostMapping(value = "", produces = "application/json")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> saveAdministrator(@RequestBody AdministratorDto data) {
+    public ResponseEntity<?> saveOfficial(@RequestBody BossDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
             data.setPassword(code);
-            Administrator adm = new Administrator(
+            Boss official = new Boss(
                     data.getCpf(),
-                    data.getRg(),
                     data.getNameComplete(),
-                    data.getPassword(),
-                    data.getBankAgency());
-            Administrator result = this.administratorCreate.createAdministrator(adm);
+                    data.getPassword());
+            Boss result = this.bossCreate.createBoss(official);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -67,7 +69,8 @@ public class AdministratorController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-     @PostMapping(value = "/login", produces = "application/json")
+   
+    @PostMapping(value = "/login", produces = "application/json")
     public ResponseEntity<?> loginClient(@RequestBody Login login) {
         try {
             var userAuthentication = new UsernamePasswordAuthenticationToken(
@@ -75,7 +78,7 @@ public class AdministratorController {
 
             var aut = this.authenticationManager.authenticate(userAuthentication);
 
-            var user = (Administrator) aut.getPrincipal();
+            var user = (Boss) aut.getPrincipal();
 
             String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
 
@@ -87,31 +90,28 @@ public class AdministratorController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Administrator clients = this.administratorSearch.getClientById(cpf);
+            Boss boss = this.bossSearch.getBossById(cpf);
 
-            return new ResponseEntity<>(clients, HttpStatus.OK);
+            return new ResponseEntity<>(boss, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
 
         }
     }
-
+    @RolesAllowed("BOSS")
     @PutMapping(value = "/{id}", produces = "application/json")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody AdministratorDto data) {
+    public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody BossDto data) {
         try {
-            Administrator adm = this.administratorSearch.getClientById(id);
+            Boss boss = this.bossSearch.getBossById(id);
 
-            adm.setNameComplete(data.getNameComplete() != null ? data.getNameComplete() : adm.getNameComplete());
-            adm.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())
-                    : adm.getPassword());
-            adm.setCpf(data.getCpf() != null ? data.getCpf() : adm.getCpf());
-            adm.setRg(data.getRg() != null ? data.getRg() : adm.getRg());
-            adm.setBankAgency(data.getBankAgency() != null ? data.getBankAgency() : adm.getBankAgency());
+            boss.setNameComplete(
+                    data.getNameComplete() != null ? data.getNameComplete() : boss.getNameComplete());
+            boss.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())
+                    : boss.getPassword());
 
-            adm.setUpdateAt(LocalDateTime.now());
+            boss.setUpdateAt(LocalDateTime.now());
 
-            Administrator update = this.administratorUpdate.updateAdministrator(adm);
+            Boss update = this.bossUpdate.updateBoss(boss);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -119,11 +119,11 @@ public class AdministratorController {
         }
     }
 
+    @RolesAllowed("BOSS")
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.administratorDelete.deleteById(id);
+            this.bossDelete.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

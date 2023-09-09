@@ -129,5 +129,11 @@ public class BorrowingRepositoryImpl implements BorrowingRepository {
     public <S extends Borrowing, R> R findBy(Example<S> example, Function<FetchableFluentQuery<S>, R> queryFunction) {
         throw new UnsupportedOperationException("Método não encontrado 'findBy'");
     }
+
+    @Override
+    public List<Borrowing> findAllByCpf(String cpf) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findAllByCpf'");
+    }
     
 }

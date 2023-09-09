@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.bank.app.usecase.administrator.AdministratorSearch;
+import com.bank.app.usecase.boss.BossSearch;
 import com.bank.app.usecase.client.ClientSearch;
 import com.bank.app.usecase.official.OfficialSearch;
 
@@ -15,14 +17,30 @@ public class ServiceClientLogin implements UserDetailsService {
     private ClientSearch clientRepository;
     @Autowired
     private OfficialSearch officialRepository;
-
+    @Autowired
+    private AdministratorSearch administratorSearch;
+    @Autowired
+    private BossSearch bossSearch;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (clientRepository.getClientByCpf(username) == null) {
-            return officialRepository.getOfficialByCpf(username);
-        } else {
+        UserDetails client = clientRepository.getClientByCpf(username);
+        if (client == null) {
+            UserDetails official = officialRepository.getOfficialByCpf(username);
+            if(official == null){
+                UserDetails adm = administratorSearch.getAdmByCpf(username);
+                if(adm == null){
+                    return bossSearch.getBossByCpf(username);
+                }
+                else{
+                    return adm;
+                }
+            }
+            else{
+                return official;
+            }
 
-            return clientRepository.getClientByCpf(username);
+        } else {
+            return client;
         }
     }
 

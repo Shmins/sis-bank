@@ -27,6 +27,7 @@ public class Configurations {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        String roleClient = "ROLE_CLIENT";
         String roleOfficial = "ROLE_OFFICIAL";
         String roleAdm = "ROLE_ADM";
         String roleBoss = "ROLE_BOSS";
@@ -36,13 +37,18 @@ public class Configurations {
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "client/v1/login").permitAll()
-                        .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
-                        .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
-                        .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
-                        .requestMatchers("official/v1/getAll").hasAnyAuthority(roleOfficial)
+                        .requestMatchers("client/v1/login").permitAll()
+                        .requestMatchers("official/v1/login").permitAll()
+                        .requestMatchers("adm/v1/login").permitAll()
+                        .requestMatchers("boss/v1/login").permitAll()
 
-                        .anyRequest().permitAll())
+                        .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
+                        .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss)
+                        .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
+                        .requestMatchers("official/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
+                        .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
+
+                        .anyRequest().authenticated())
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

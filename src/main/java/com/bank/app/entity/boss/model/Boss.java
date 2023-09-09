@@ -1,37 +1,28 @@
-package com.bank.app.entity.administrator.model;
+package com.bank.app.entity.boss.model;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.exception.CpfException;
-import com.bank.app.entity.client.exception.GenericException;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Data
-@Document(collection = "Administrator")
-public class Administrator implements UserDetails{
+public class Boss implements UserDetails{
     @Id
     private String cpf;
 
-    private String rg;
-
-    private String password;
-
     private String nameComplete;
-
-    private String bankAgency;
+    
+    private String password;
 
     private String role;
 
@@ -39,49 +30,51 @@ public class Administrator implements UserDetails{
 
     private LocalDateTime updateAt;
 
-    public Administrator(String cpf, String rg, String nameComplete, String password, String bankAgency) {
+    public Boss(String cpf, String nameComplete, String password){
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
-
-        if (rg.length() != 11) {
-            throw new GenericException("RG com formato inválido");
-        }
         this.cpf = cpf;
-        this.rg = rg;
         this.nameComplete = nameComplete;
         this.password = password;
-        this.bankAgency = bankAgency;
-        this.role = "ROLE_ADM";
+        this.role = "ROLE_BOSS";
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
+
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role));
     }
+
     @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
+
     @Override
     public String getUsername() {
-       return this.cpf;
+        return cpf;
     }
+
     @Override
     public boolean isAccountNonExpired() {
-      return true;
+        return true;
     }
+
     @Override
     public boolean isAccountNonLocked() {
-       return true;
+        return true;
     }
+
     @Override
     public boolean isCredentialsNonExpired() {
-       return true;
+        return true;
     }
+
     @Override
     public boolean isEnabled() {
-       return true;
+        return true;
     }
+
 }

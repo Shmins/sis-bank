@@ -86,12 +86,6 @@ public class ClientController {
             }
             List<Card> cards = client.getCards().isEmpty() ? new ArrayList<>() : client.getCards();
 
-            for (int i = 0; i < client.getCards().size(); i++) {
-                if (client.getCards().get(i).getNumberCard().equals(data.getNumberCard())
-                        || client.getCards().get(i).getCvc() == data.getCvc()) {
-                    throw new GenericException("Número de cartão ou cvc duplicado");
-                }
-            }
             cards.add(data);
 
             client.setCards(cards);
@@ -191,7 +185,6 @@ public class ClientController {
             Card card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard())).toList().get(0);
 
             card.setNumberCard(data.getNumberCard() != null ? data.getNumberCard() : card.getNumberCard());
-            card.setCvc(data.getCvc() != card.getCvc() ? data.getCvc() : card.getCvc());
             card.setTypeIssuer(data.getTypeIssuer() != null ? data.getTypeIssuer() : card.getTypeIssuer());
             card.setValidityDate(data.getValidityDate() != null ? data.getValidityDate() : card.getValidityDate());
             card.setTypeCard(data.getTypeCard() != null ? data.getTypeCard() : card.getTypeCard());
@@ -215,7 +208,6 @@ public class ClientController {
             client.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())
                     : client.getPassword());
             client.setEmail(data.getEmail() != null ? data.getEmail() : client.getEmail());
-            client.setCpf(data.getEmail() != null ? data.getCpf() : client.getCpf());
             client.setPhone(data.getPhone() != null ? data.getPhone() : client.getPhone());
             client.setTypeAccount(data.getTypeAccount() != null ? data.getTypeAccount() : client.getTypeAccount());
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
