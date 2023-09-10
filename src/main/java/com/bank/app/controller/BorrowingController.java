@@ -20,31 +20,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
-import com.bank.app.usecase.borrowing.BorrowingCreate;
-import com.bank.app.usecase.borrowing.BorrowingDelete;
-import com.bank.app.usecase.borrowing.BorrowingSearch;
+import com.bank.app.usecase.borrowing.BorrowingService;
 import com.bank.app.usecase.borrowing.BorrowingTdo;
-import com.bank.app.usecase.borrowing.BorrowingUpdate;
 
 @RestController
 @RequestMapping("borrowing/v1")
 @CrossOrigin(origins = "*")
 public class BorrowingController {
     @Autowired
-    private BorrowingSearch borrowingSearch;
-    @Autowired
-    private BorrowingCreate borrowingCreate;
-    @Autowired
-    private BorrowingUpdate borrowingUpdate;
-    @Autowired
-    private BorrowingDelete borrowingDelete;
+    private BorrowingService borrowingService;
 
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> postBorrowing(@RequestBody BorrowingTdo data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Borrowing borrowing = new Borrowing(client.getCpf(), data.getQuantity());
-            Borrowing result = this.borrowingCreate.createBorrowing(borrowing);
+            Borrowing result = this.borrowingService.createBorrowing(borrowing);
 
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -55,7 +46,7 @@ public class BorrowingController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getBorrowingAll() {
         try {
-            List<Borrowing> result = this.borrowingSearch.getAll();
+            List<Borrowing> result = this.borrowingService.getAll();
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
@@ -65,7 +56,7 @@ public class BorrowingController {
     public ResponseEntity<?> getBorrowingAllForClient() {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            List<Borrowing> result = this.borrowingSearch.getAllForClient(client.getCpf());
+            List<Borrowing> result = this.borrowingService.getAllForClient(client.getCpf());
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
@@ -74,7 +65,7 @@ public class BorrowingController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getBorrowing(@PathVariable("cpf") String cpf) {
         try {
-            Borrowing result = this.borrowingSearch.getBorrowingById(cpf);
+            Borrowing result = this.borrowingService.getBorrowingById(cpf);
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
@@ -85,7 +76,7 @@ public class BorrowingController {
     @PutMapping(value = "/{cpf}", produces = "application/json")
     public ResponseEntity<?> updateBorrowingById(@PathVariable("cpf") String id, @RequestBody BorrowingTdo data) {
         try {
-            Borrowing borrowing = this.borrowingSearch.getBorrowingById(id);
+            Borrowing borrowing = this.borrowingService.getBorrowingById(id);
 
             borrowing.setCpf(data.getCpf() != null ? data.getCpf() : borrowing.getCpf());
             borrowing.setQuantity(
@@ -95,7 +86,7 @@ public class BorrowingController {
             borrowing.setIsRefused(data.getIsRefused() != null ? data.getIsRefused() : borrowing.getIsRefused());
             borrowing.setUpdateAt(LocalDateTime.now());
 
-            Borrowing update = this.borrowingUpdate.updateBorrowing(borrowing);
+            Borrowing update = this.borrowingService.updateBorrowing(borrowing);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -107,7 +98,7 @@ public class BorrowingController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteBorrowingById(@PathVariable("id") String id) {
         try {
-            this.borrowingDelete.deleteById(id);
+            this.borrowingService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

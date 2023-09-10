@@ -28,10 +28,7 @@ import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
 import com.bank.app.usecase.client.ClientDto;
-import com.bank.app.usecase.client.ClientCreate;
-import com.bank.app.usecase.client.ClientDelete;
-import com.bank.app.usecase.client.ClientSearch;
-import com.bank.app.usecase.client.ClientUpdate;
+import com.bank.app.usecase.client.ClientService;
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -40,15 +37,8 @@ import jakarta.annotation.security.RolesAllowed;
 @RequestMapping("client/v1")
 @CrossOrigin(origins = "*")
 public class ClientController {
-
     @Autowired
-    private ClientCreate clientCreate;
-    @Autowired
-    private ClientSearch clientSearch;
-    @Autowired
-    private ClientUpdate clientUpdate;
-    @Autowired
-    private ClientDelete clientDelete;
+    private ClientService clientService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -67,7 +57,7 @@ public class ClientController {
                     data.getTypeAccount(),
                     data.getPhone(),
                     data.getAddress());
-            Client result = this.clientCreate.createClient(client);
+            Client result = this.clientService.createClient(client);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -80,7 +70,7 @@ public class ClientController {
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")
     public ResponseEntity<?> saveCards(@RequestBody Card data, @PathVariable("cpf") String cpf) {
         try {
-            Client client = this.clientSearch.getClientById(cpf);
+            Client client = this.clientService.getClientById(cpf);
             if (client.getCards().size() == 6) {
                 throw new GenericException("limite de cartões exedido");
             }
@@ -89,7 +79,7 @@ public class ClientController {
             cards.add(data);
 
             client.setCards(cards);
-            Client result = this.clientUpdate.updateClient(client);
+            Client result = this.clientService.updateClient(client);
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
 
         } catch (Exception e) {
@@ -117,14 +107,14 @@ public class ClientController {
     }
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAll() {
-        List<Client> clients = this.clientSearch.getAll();
+        List<Client> clients = this.clientService.getAll();
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
    @GetMapping(value = "/cards/cpf/{cpf}")
     public ResponseEntity<?> getAllCardsByCpf(@PathVariable("cpf") String cpf) {
         try {
-            Client clients = this.clientSearch.getClientById(cpf);
+            Client clients = this.clientService.getClientById(cpf);
 
             return new ResponseEntity<>(clients.getCards(), HttpStatus.OK);
         } catch (Exception e) {
@@ -135,7 +125,7 @@ public class ClientController {
     @GetMapping(value = "/cards/{number}")
     public ResponseEntity<?> getCardByNumberCard(@PathVariable("number") String number) {
         try {
-            Client client = this.clientSearch.getCardClient(number);
+            Client client = this.clientService.getCardClient(number);
             var card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard()));
             return new ResponseEntity<>(card, HttpStatus.OK);
         } catch (Exception e) {
@@ -146,7 +136,7 @@ public class ClientController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Client clients = this.clientSearch.getClientById(cpf);
+            Client clients = this.clientService.getClientById(cpf);
 
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
@@ -158,7 +148,7 @@ public class ClientController {
     @GetMapping(value = "/email/{email}")
     public ResponseEntity<?> getByEmail(@PathVariable("email") String email) {
         try {
-            List<Client> clients = this.clientSearch.getClientByEmail(email);
+            List<Client> clients = this.clientService.getClientByEmail(email);
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -169,7 +159,7 @@ public class ClientController {
     @GetMapping(value = "/email/{nameComplete}")
     public ResponseEntity<?> getByNameComplete(@PathVariable("nameComplete") String nameComplete) {
         try {
-            List<Client> clients = this.clientSearch.getClientByNameComplete(nameComplete);
+            List<Client> clients = this.clientService.getClientByNameComplete(nameComplete);
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -180,7 +170,7 @@ public class ClientController {
     @PutMapping(value = "/cards/{number}", produces = "application/json")
     public ResponseEntity<?> updateCardById(@PathVariable("number") String number, @RequestBody Card data) {
         try {
-            Client client = this.clientSearch.getCardClient(number);
+            Client client = this.clientService.getCardClient(number);
 
             Card card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard())).toList().get(0);
 
@@ -192,7 +182,7 @@ public class ClientController {
 
             var cards = client.getCards().stream().filter(res -> !number.equals(res.getNumberCard())).toList();
             client.setCards(cards);
-            this.clientUpdate.updateClient(client);
+            this.clientService.updateClient(client);
             return new ResponseEntity<>(cards, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -202,7 +192,7 @@ public class ClientController {
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ClientDto data) {
         try {
-            Client client = this.clientSearch.getClientById(id);
+            Client client = this.clientService.getClientById(id);
 
             client.setNameComplete(data.getNameComplete() != null ? data.getNameComplete() : client.getNameComplete());
             client.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())
@@ -213,7 +203,7 @@ public class ClientController {
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
             client.setUpdateAt(LocalDateTime.now());
 
-            Client update = this.clientUpdate.updateClient(client);
+            Client update = this.clientService.updateClient(client);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -224,7 +214,7 @@ public class ClientController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.clientDelete.deleteById(id);
+            this.clientService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -234,10 +224,10 @@ public class ClientController {
     @DeleteMapping(value = "/cards/{number}")
     public ResponseEntity<?> deleteCardById(@PathVariable("number") String number) {
         try {
-            Client client = this.clientSearch.getCardClient(number);
+            Client client = this.clientService.getCardClient(number);
             List<Card> card = client.getCards().stream().filter(res -> !number.equals(res.getNumberCard())).toList();
             client.setCards(card);
-            this.clientUpdate.updateClient(client);
+            this.clientService.updateClient(client);
             return new ResponseEntity<>(card, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

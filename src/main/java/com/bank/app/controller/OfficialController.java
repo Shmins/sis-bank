@@ -20,11 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bank.app.usecase.official.OfficialCreate;
-import com.bank.app.usecase.official.OfficialDelete;
 import com.bank.app.usecase.official.OfficialDto;
-import com.bank.app.usecase.official.OfficialSearch;
-import com.bank.app.usecase.official.OfficialUpdate;
+import com.bank.app.usecase.official.OfficialService;
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -39,13 +36,7 @@ import com.bank.app.infrastructure.token.TokenUserTdo;
 
 public class OfficialController {
     @Autowired
-    private OfficialCreate officialCreate;
-    @Autowired
-    private OfficialSearch officialSearch;
-    @Autowired
-    private OfficialUpdate officialUpdate;
-    @Autowired
-    private OfficialDelete officialDelete;
+    private OfficialService officialService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -64,7 +55,7 @@ public class OfficialController {
                     data.getEmail(),
                     data.getPassword(),
                     data.getAddress());
-            Official result = this.officialCreate.createOfficial(official);
+            Official result = this.officialService.createOfficial(official);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -93,7 +84,7 @@ public class OfficialController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Official official = this.officialSearch.getOfficialById(cpf);
+            Official official = this.officialService.getOfficialById(cpf);
 
             return new ResponseEntity<>(official, HttpStatus.OK);
         } catch (Exception e) {
@@ -104,7 +95,7 @@ public class OfficialController {
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getById() {
         try {
-            List<Official> official = this.officialSearch.getAll();
+            List<Official> official = this.officialService.getAll();
 
             return new ResponseEntity<>(official, HttpStatus.OK);
         } catch (Exception e) {
@@ -117,7 +108,7 @@ public class OfficialController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody OfficialDto data) {
         try {
-            Official official = this.officialSearch.getOfficialById(id);
+            Official official = this.officialService.getOfficialById(id);
 
             official.setNameComplete(
                     data.getNameComplete() != null ? data.getNameComplete() : official.getNameComplete());
@@ -130,7 +121,7 @@ public class OfficialController {
 
             official.setUpdateAt(LocalDateTime.now());
 
-            Official update = this.officialUpdate.updateOfficial(official);
+            Official update = this.officialService.updateOfficial(official);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -143,7 +134,7 @@ public class OfficialController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.officialDelete.deleteById(id);
+            this.officialService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

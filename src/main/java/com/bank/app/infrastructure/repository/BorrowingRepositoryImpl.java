@@ -132,7 +132,6 @@ public class BorrowingRepositoryImpl implements BorrowingRepository {
 
     @Override
     public List<Borrowing> findAllByCpf(String cpf) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAllByCpf'");
     }
     

@@ -27,6 +27,8 @@ public class Card {
 
     private String validityDate;
 
+    private boolean isActive;
+
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
@@ -53,6 +55,7 @@ public class Card {
         this.numberCard = numberCard;
         this.cvc = cvc;
         this.validityDate = validityDate;
+        this.isActive = false;
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
     }

@@ -54,6 +54,7 @@ public class Official implements UserDetails {
 
         }
         this.cpf = cpf;
+        this.rg = rg;
         this.nameComplete = nameComplete;
         this.email = email;
         this.password = password;

@@ -23,11 +23,9 @@ import com.bank.app.entity.administrator.model.Administrator;
 import com.bank.app.entity.client.model.Login;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
-import com.bank.app.usecase.administrator.AdministratorCreate;
-import com.bank.app.usecase.administrator.AdministratorDelete;
 import com.bank.app.usecase.administrator.AdministratorDto;
-import com.bank.app.usecase.administrator.AdministratorSearch;
-import com.bank.app.usecase.administrator.AdministratorUpdate;
+import com.bank.app.usecase.administrator.AdministratorService;
+
 
 
 @RestController
@@ -36,17 +34,12 @@ import com.bank.app.usecase.administrator.AdministratorUpdate;
 
 public class AdministratorController {
     @Autowired
-    private AdministratorCreate administratorCreate;
-    @Autowired
-    private AdministratorSearch administratorSearch;
-    @Autowired
-    private AdministratorUpdate administratorUpdate;
-    @Autowired
-    private AdministratorDelete administratorDelete;
+    private AdministratorService administratorService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private TokenService tokenService;
+
     @PostMapping(value = "", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> saveAdministrator(@RequestBody AdministratorDto data) {
@@ -59,7 +52,7 @@ public class AdministratorController {
                     data.getNameComplete(),
                     data.getPassword(),
                     data.getBankAgency());
-            Administrator result = this.administratorCreate.createAdministrator(adm);
+            Administrator result = this.administratorService.createAdministrator(adm);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -87,7 +80,7 @@ public class AdministratorController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Administrator clients = this.administratorSearch.getClientById(cpf);
+            Administrator clients = this.administratorService.getAdmById(cpf);
 
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
@@ -100,7 +93,7 @@ public class AdministratorController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody AdministratorDto data) {
         try {
-            Administrator adm = this.administratorSearch.getClientById(id);
+            Administrator adm = this.administratorService.getAdmById(id);
 
             adm.setNameComplete(data.getNameComplete() != null ? data.getNameComplete() : adm.getNameComplete());
             adm.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())
@@ -111,7 +104,7 @@ public class AdministratorController {
 
             adm.setUpdateAt(LocalDateTime.now());
 
-            Administrator update = this.administratorUpdate.updateAdministrator(adm);
+            Administrator update = this.administratorService.updateAdministrator(adm);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -123,7 +116,7 @@ public class AdministratorController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.administratorDelete.deleteById(id);
+            this.administratorService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

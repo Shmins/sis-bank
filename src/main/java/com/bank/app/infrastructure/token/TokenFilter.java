@@ -9,10 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.bank.app.usecase.administrator.AdministratorSearch;
-import com.bank.app.usecase.boss.BossSearch;
-import com.bank.app.usecase.client.ClientSearch;
-import com.bank.app.usecase.official.OfficialSearch;
+import com.bank.app.usecase.administrator.AdministratorService;
+import com.bank.app.usecase.boss.BossService;
+import com.bank.app.usecase.client.ClientService;
+import com.bank.app.usecase.official.OfficialService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,13 +24,13 @@ public class TokenFilter extends OncePerRequestFilter {
   @Autowired
   private TokenService tokenService;
   @Autowired
-  private ClientSearch clientRepository;
+  private ClientService clientRepository;
   @Autowired
-  private OfficialSearch officialRepository;
+  private OfficialService officialRepository;
   @Autowired
-  private AdministratorSearch administratorRepository;
+  private AdministratorService administratorService;
   @Autowired
-  private BossSearch bossRepository;
+  private BossService bossService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
@@ -62,14 +62,14 @@ public class TokenFilter extends OncePerRequestFilter {
           break;
         }
         case ("ROLE_ADM"): {
-          var user = this.administratorRepository.getAdmByCpf(subject);
+          var user = this.administratorService.getAdmByCpf(subject);
 
           var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
           SecurityContextHolder.getContext().setAuthentication(auth);
           break;
         }
         case ("ROLE_BOSS"): {
-          var user = this.bossRepository.getBossByCpf(subject);
+          var user = this.bossService.getBossByCpf(subject);
           var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
           SecurityContextHolder.getContext().setAuthentication(auth);
           break;

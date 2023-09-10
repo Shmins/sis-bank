@@ -18,12 +18,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.bank.app.usecase.boss.BossCreate;
-import com.bank.app.usecase.boss.BossDelete;
 import com.bank.app.usecase.boss.BossDto;
-import com.bank.app.usecase.boss.BossSearch;
-import com.bank.app.usecase.boss.BossUpdate;
+
+import com.bank.app.usecase.boss.BossService;
+
 
 
 import jakarta.annotation.security.RolesAllowed;
@@ -39,13 +37,7 @@ import com.bank.app.infrastructure.token.TokenUserTdo;
 
 public class BossController {
     @Autowired
-    private BossCreate bossCreate;
-    @Autowired
-    private BossSearch bossSearch;
-    @Autowired
-    private BossUpdate bossUpdate;
-    @Autowired
-    private BossDelete bossDelete;
+    private BossService bossService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -61,7 +53,7 @@ public class BossController {
                     data.getCpf(),
                     data.getNameComplete(),
                     data.getPassword());
-            Boss result = this.bossCreate.createBoss(official);
+            Boss result = this.bossService.createBoss(official);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -90,7 +82,7 @@ public class BossController {
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
-            Boss boss = this.bossSearch.getBossById(cpf);
+            Boss boss = this.bossService.getBossById(cpf);
 
             return new ResponseEntity<>(boss, HttpStatus.OK);
         } catch (Exception e) {
@@ -102,7 +94,7 @@ public class BossController {
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody BossDto data) {
         try {
-            Boss boss = this.bossSearch.getBossById(id);
+            Boss boss = this.bossService.getBossById(id);
 
             boss.setNameComplete(
                     data.getNameComplete() != null ? data.getNameComplete() : boss.getNameComplete());
@@ -111,7 +103,7 @@ public class BossController {
 
             boss.setUpdateAt(LocalDateTime.now());
 
-            Boss update = this.bossUpdate.updateBoss(boss);
+            Boss update = this.bossService.updateBoss(boss);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -123,7 +115,7 @@ public class BossController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.bossDelete.deleteById(id);
+            this.bossService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

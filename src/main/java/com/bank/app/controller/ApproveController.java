@@ -1,6 +1,7 @@
 package com.bank.app.controller;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,17 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
+import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.official.model.Official;
-import com.bank.app.usecase.approve.ApproveCreate;
-import com.bank.app.usecase.approve.ApproveDelete;
+
 import com.bank.app.usecase.approve.ApproveDto;
-import com.bank.app.usecase.approve.ApproveSearch;
-import com.bank.app.usecase.approve.ApproveUpdate;
-import com.bank.app.usecase.borrowing.BorrowingSearch;
-import com.bank.app.usecase.borrowing.BorrowingUpdate;
-import com.bank.app.usecase.official.OfficialSearch;
-import com.bank.app.usecase.official.OfficialUpdate;
+
+import com.bank.app.usecase.approve.ApproveService;
+
+import com.bank.app.usecase.borrowing.BorrowingService;
+import com.bank.app.usecase.client.ClientService;
+import com.bank.app.usecase.official.OfficialService;
 
 @RestController
 @RequestMapping("approve/v1")
@@ -37,21 +39,13 @@ import com.bank.app.usecase.official.OfficialUpdate;
 @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
 public class ApproveController {
     @Autowired
-    private ApproveSearch approveSearch;
+    private ApproveService approveService;
     @Autowired
-    private ApproveCreate approveCreate;
+    private BorrowingService borrowingService;
     @Autowired
-    private ApproveUpdate approveUpdate;
+    private OfficialService officialService;
     @Autowired
-    private ApproveDelete approveDelete;
-    @Autowired
-    private BorrowingSearch borrowingSearch;
-    @Autowired
-    private BorrowingUpdate borrowingUpdate;
-    @Autowired
-    private OfficialSearch officialSearch;
-    @Autowired
-    private OfficialUpdate officialUpdate;
+    private ClientService clientService;
     
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> saveApprove(@RequestBody ApproveDto data) {
@@ -68,7 +62,7 @@ public class ApproveController {
                     false,
                     LocalDateTime.now(),
                     LocalDateTime.now());
-            Approve result = this.approveCreate.createApprove(approve);
+            Approve result = this.approveService.createApprove(approve);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -80,7 +74,7 @@ public class ApproveController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") String id) {
         try {
-            Approve clients = this.approveSearch.getApproveById(id);
+            Approve clients = this.approveService.getApproveById(id);
     
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
@@ -92,7 +86,7 @@ public class ApproveController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getApprovegAll() {
         try {
-           var result = this.approveSearch.getAll();
+           var result = this.approveService.getAll();
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
@@ -102,7 +96,7 @@ public class ApproveController {
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ApproveDto data) {
         try {
-            Approve approve = this.approveSearch.getApproveById(id);
+            Approve approve = this.approveService.getApproveById(id);
 
             approve.setBorrowing(data.getBorrowing() != null ? data.getBorrowing() : approve.getBorrowing());
             approve.setCpfCreatedReq(
@@ -116,7 +110,7 @@ public class ApproveController {
 
             approve.setUpdateAt(LocalDateTime.now());
 
-            Approve update = this.approveUpdate.updateBorrowing(approve);
+            Approve update = this.approveService.updateApprove(approve);
 
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
         } catch (Exception e) {
@@ -130,9 +124,9 @@ public class ApproveController {
             UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             switch (router) {
                 case "borrowing": {
-                    Borrowing borrowing = this.borrowingSearch.getBorrowingById(id);
+                    Borrowing borrowing = this.borrowingService.getBorrowingById(id);
                     borrowing.setIsAuthorized(true);
-                    this.borrowingUpdate.updateBorrowing(borrowing);
+                    this.borrowingService.updateBorrowing(borrowing);
                     return new ResponseEntity<>(borrowing, HttpStatus.OK);
                 }
                 case "official": {
@@ -140,10 +134,26 @@ public class ApproveController {
                     if(!role.get(0).getAuthority().equals("ROLE_BOSS")){
                         throw new IllegalAccessError("Não autorizado");
                     }
-                    Official official = this.officialSearch.getOfficialById(id);
+                    Official official = this.officialService.getOfficialById(id);
                     official.setIsAuthorized(true);
-                    this.officialUpdate.updateOfficial(official);
+
+                    this.officialService.updateOfficial(official);
+
                     return new ResponseEntity<>(HttpStatus.OK);
+                }
+                case "cards": {
+                    Client client = this.clientService.getCardClient(id);
+                    Card card = client.getCards().stream().filter(res -> id.equals(res.getNumberCard())).toList().get(0);
+                    List<Card> cards = client.getCards().stream().filter(res -> !id.equals(res.getNumberCard())).toList();
+                    card.setActive(true);
+
+                    cards.add(card);
+                    client.setCards(cards);
+
+                    this.clientService.updateClient(client);
+                    
+                    return new ResponseEntity<>(HttpStatus.OK);
+
                 }
                 default: {
                    return null;
@@ -160,7 +170,7 @@ public class ApproveController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
-            this.approveDelete.deleteById(id);
+            this.approveService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
