@@ -43,7 +43,7 @@ public class Configurations {
                         .requestMatchers("boss/v1/login").permitAll()
 
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
-                        .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss)
+                        .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
                         .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
                         .requestMatchers("official/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.bank.app.entity.client.model.Account;
+import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
 
 import lombok.AllArgsConstructor;
@@ -19,13 +21,11 @@ public class Approve {
     @Id
     private String id;
 
-    private String borrowingId; //borrowing
+    private Borrowing borrowing; //borrowing
 
-    private String cpfOfficial; //borrowing, Official
+    private String cpfCreatedReq; //Official, Adm, Boss
 
-    private String cpfOfClient; //borrowing, card
-
-    private int quantity; //borrowing
+    private Account account;
 
     private Card card; //card
 
@@ -39,8 +39,4 @@ public class Approve {
 
     private LocalDateTime updateAt;
 
-    public void main(){
-        createdAt = LocalDateTime.now();
-        updateAt = LocalDateTime.now();
-    }
 }

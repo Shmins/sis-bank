@@ -51,12 +51,10 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-
     @GetMapping(value = "/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getBorrowingAll() {
         try {
-            
             List<Borrowing> result = this.borrowingSearch.getAll();
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -50,14 +51,19 @@ public class TokenFilter extends OncePerRequestFilter {
           break;
         }
         case ("ROLE_OFFICIAL"): {
-          var user = this.officialRepository.getOfficialByCpf(subject);
-          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-          SecurityContextHolder.getContext().setAuthentication(auth);
+          UserDetails user = this.officialRepository.getOfficialByCpf(subject);
+
+          if (user.isEnabled()) {
+            var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+          }else{
+            throw new IllegalAccessError("Funcionário não autorizado");
+          }
           break;
         }
         case ("ROLE_ADM"): {
           var user = this.administratorRepository.getAdmByCpf(subject);
-          
+
           var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
           SecurityContextHolder.getContext().setAuthentication(auth);
           break;

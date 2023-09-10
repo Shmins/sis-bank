@@ -38,6 +38,8 @@ public class Official implements UserDetails {
 
     private String role;
 
+    private Boolean isAuthorized;
+
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
@@ -57,6 +59,7 @@ public class Official implements UserDetails {
         this.password = password;
         this.address = address;
         this.role = "ROLE_OFFICIAL";
+        this.isAuthorized = false;
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
     }

@@ -1,5 +1,7 @@
 package com.bank.app.usecase.approve;
 
+import com.bank.app.entity.client.model.Account;
+import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
 
 import lombok.AllArgsConstructor;
@@ -10,13 +12,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ApproveDto {
-    private String borrowingId; //borrowing
+    
+    private Borrowing borrowing; //borrowing
 
-    private String cpfOfficial; //borrowing, Official
+    private String cpfCreatedReq; //Official, Adm, Boss
 
-    private String cpfOfClient; //borrowing, card
-
-    private int quantity; //borrowing
+    private Account account;
 
     private Card card; //card
 
