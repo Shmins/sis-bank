@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.exception.GenericException;
+import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
+import com.bank.app.usecase.account.AccountDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
 
@@ -54,10 +56,27 @@ public class ClientController {
                     data.getNameComplete(),
                     data.getEmail(),
                     data.getPassword(),
-                    data.getTypeAccount(),
+                    data.getAccount(),
                     data.getPhone(),
                     data.getAddress());
             Client result = this.clientService.createClient(client);
+
+            return new ResponseEntity<>(result, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.valueOf(500));
+        }
+    }
+
+    @PostMapping(value = "{cpf}", produces = "application/json")
+    public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
+        try {
+            Client client = this.clientService.getClientById(cpf);
+            Account account = new Account(data.getNameComplete(), data.getTypeAccount(), data.getCpf());
+            List<Account> ac = client.getAccount();
+            ac.add(account);
+            client.setAccount(ac);
+            Client result = this.clientService.updateClient(client);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -105,13 +124,14 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(401));
         }
     }
+
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAll() {
         List<Client> clients = this.clientService.getAll();
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
-   @GetMapping(value = "/cards/cpf/{cpf}")
+    @GetMapping(value = "/cards/cpf/{cpf}")
     public ResponseEntity<?> getAllCardsByCpf(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientService.getClientById(cpf);
@@ -199,7 +219,6 @@ public class ClientController {
                     : client.getPassword());
             client.setEmail(data.getEmail() != null ? data.getEmail() : client.getEmail());
             client.setPhone(data.getPhone() != null ? data.getPhone() : client.getPhone());
-            client.setTypeAccount(data.getTypeAccount() != null ? data.getTypeAccount() : client.getTypeAccount());
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
             client.setUpdateAt(LocalDateTime.now());
 

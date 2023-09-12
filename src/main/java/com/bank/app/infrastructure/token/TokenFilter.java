@@ -56,7 +56,7 @@ public class TokenFilter extends OncePerRequestFilter {
           if (user.isEnabled()) {
             var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
-          }else{
+          } else {
             throw new IllegalAccessError("Funcionário não autorizado");
           }
           break;
@@ -80,6 +80,7 @@ public class TokenFilter extends OncePerRequestFilter {
       }
 
     }
+    
     filterChain.doFilter(req, res);
   }
 

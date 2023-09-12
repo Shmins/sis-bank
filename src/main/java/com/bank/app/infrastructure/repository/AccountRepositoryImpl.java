@@ -10,10 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
 
+
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.repository.AccountRepository;
 
-public class AccountRepositoryImpl implements AccountRepository{
+public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public <S extends Account> S insert(S entity) {
@@ -129,5 +130,11 @@ public class AccountRepositoryImpl implements AccountRepository{
     public <S extends Account, R> R findBy(Example<S> example, Function<FetchableFluentQuery<S>, R> queryFunction) {
         throw new UnsupportedOperationException("Método não encontrado 'findBy'");
     }
-    
+
+    @Override
+    public List<Account> findAllByCpf(String cpf) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAllByCpf'");
+    }
+
+   
 }

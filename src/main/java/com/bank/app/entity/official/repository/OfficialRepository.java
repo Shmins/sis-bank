@@ -11,4 +11,5 @@ public interface OfficialRepository extends MongoRepository<Official, String>{
     UserDetails findByCpf(String cpf);
     List<Official> findByRg(String rg);
     List<Official> findByNameComplete(String nameComplete);
+
 }

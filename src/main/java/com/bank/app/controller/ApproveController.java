@@ -20,11 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.official.model.Official;
-
+import com.bank.app.usecase.account.AccountService;
 import com.bank.app.usecase.approve.ApproveDto;
 
 import com.bank.app.usecase.approve.ApproveService;
@@ -46,7 +47,8 @@ public class ApproveController {
     private OfficialService officialService;
     @Autowired
     private ClientService clientService;
-    
+    @Autowired 
+    private AccountService accountService;
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> saveApprove(@RequestBody ApproveDto data) {
         try {
@@ -134,12 +136,9 @@ public class ApproveController {
                     if(!role.get(0).getAuthority().equals("ROLE_BOSS")){
                         throw new IllegalAccessError("Não autorizado");
                     }
-                    Official official = this.officialService.getOfficialById(id);
-                    official.setIsAuthorized(true);
+                    Official official = this.officialService.findByCpfAfterActive(id);
 
-                    this.officialService.updateOfficial(official);
-
-                    return new ResponseEntity<>(HttpStatus.OK);
+                    return new ResponseEntity<>(official, HttpStatus.OK);
                 }
                 case "cards": {
                     Client client = this.clientService.getCardClient(id);
@@ -153,6 +152,11 @@ public class ApproveController {
                     this.clientService.updateClient(client);
                     
                     return new ResponseEntity<>(HttpStatus.OK);
+
+                }
+                case "account": {
+                    Account account = this.accountService.findByIdAfterActive(id);
+                    return new ResponseEntity<>(account, HttpStatus.OK);
 
                 }
                 default: {

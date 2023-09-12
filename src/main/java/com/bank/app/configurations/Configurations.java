@@ -48,7 +48,7 @@ public class Configurations {
                         .requestMatchers("official/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
 
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

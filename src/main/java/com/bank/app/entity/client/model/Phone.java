@@ -13,10 +13,6 @@ public class Phone {
         if (number == null || ddd == null) {
             throw new IllegalArgumentException("Número de telefone vazio");
         }
-        if (!number.matches("\\d{8}|\\d{9}")) {
-            throw new IllegalArgumentException("Número de telefone inválido");
-        }
-    
 
         this.number = number;
         this.ddd = ddd;

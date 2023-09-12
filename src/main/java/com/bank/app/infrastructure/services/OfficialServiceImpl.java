@@ -63,4 +63,11 @@ public class OfficialServiceImpl implements OfficialService {
         return officialRepository.save(official);
     }
 
+    @Override
+    public Official findByCpfAfterActive(String cpf) {
+        Official official = this.getOfficialById(cpf);
+        official.setIsAuthorized(true);
+        return this.officialRepository.save(official);
+    }
+
 }
