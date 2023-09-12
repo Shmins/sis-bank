@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.exception.GenericException;
-import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
-import com.bank.app.usecase.account.AccountDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
 
@@ -45,7 +43,6 @@ public class ClientController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private TokenService tokenService;
-
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto data) {
         try {
@@ -60,7 +57,7 @@ public class ClientController {
                     data.getPhone(),
                     data.getAddress());
             Client result = this.clientService.createClient(client);
-
+           
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -68,7 +65,7 @@ public class ClientController {
         }
     }
 
-    @PostMapping(value = "{cpf}", produces = "application/json")
+   /*  @PostMapping(value = "{cpf}", produces = "application/json")
     public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientService.getClientById(cpf);
@@ -83,7 +80,7 @@ public class ClientController {
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
-    }
+    } */
 
     @RolesAllowed("CLIENT")
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")

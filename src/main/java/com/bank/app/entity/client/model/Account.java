@@ -14,7 +14,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Document(collection = "Account")
 public class Account {
     @Id
     private String id;
@@ -31,5 +30,6 @@ public class Account {
         this.typeAccount = typeAccount;
         this.cpf = cpf;
         this.nameComplete = nameComplete;
+        this.isActive = false;
     }
 }

@@ -43,7 +43,7 @@ public class Client implements UserDetails {
 
     private LocalDateTime updateAt;
 
-    public Client(String cpf, String nameComplete, String email, String password, Account account, Phone phone,
+    public Client(String cpf, String nameComplete, String email, String password, List<Account> account, Phone phone,
             Address address) {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
@@ -53,7 +53,7 @@ public class Client implements UserDetails {
         this.nameComplete = nameComplete;
         this.email = email;
         this.password = password;
-        this.account.add(account);
+        this.account = account;
         this.phone = phone;
         this.address = address;
         this.role = "ROLE_CLIENT";

@@ -1,5 +1,7 @@
 package com.bank.app.usecase.client;
 
+import java.util.List;
+
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Address;
 import com.bank.app.entity.client.model.Phone;
@@ -21,7 +23,7 @@ public class ClientDto {
 
     private String password;
 
-    private Account account;
+    private List<Account> account;
 
     private Phone phone;
 

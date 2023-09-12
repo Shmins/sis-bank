@@ -10,7 +10,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
@@ -20,13 +19,9 @@ public class ConfigurationsWeb implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        var header = req.getHeader("Access-Control-Allow-Origin");
 
-        ((HttpServletResponse) res).addHeader("Access-Control-Allow-Origin", header);
-        ((HttpServletResponse) res).addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-        ((HttpServletResponse) res).addHeader("Access-Control-Allow-Headers", "*");
-        chain.doFilter(req, res);
+        
+        chain.doFilter(request, res);
     }
 
 }
