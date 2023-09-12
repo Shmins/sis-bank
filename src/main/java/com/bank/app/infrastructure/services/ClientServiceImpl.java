@@ -1,5 +1,6 @@
 package com.bank.app.infrastructure.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
+import com.bank.app.entity.client.model.NumberAgency;
 import com.bank.app.entity.client.repository.ClientRepository;
 import com.bank.app.usecase.client.ClientService;
 
@@ -66,6 +69,23 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public Client updateClient(Client client) {
         return clientRepository.save(client);
+    }
+
+    @Override
+    public Account getByIdAccountAfterActive(String id, NumberAgency agency) {
+        Client client = this.clientRepository.findByIdAccount(id);
+        List<Account> account = client.getAccount();
+        for (int i = 0; i < account.stream().count(); i++) {
+            if (account.get(i).getId().equals(id)) {
+                account.get(i).setIsActive(true);
+                account.get(i).setNumberAgency(agency);
+                account.get(i).setUpdateAt(LocalDateTime.now());
+            }
+        }
+        client.setAccount(account);
+
+        this.clientRepository.save(client);
+        return client.getAccount().stream().filter(res -> res.getId().equals(id)).toList().get(0);
     }
 
 }

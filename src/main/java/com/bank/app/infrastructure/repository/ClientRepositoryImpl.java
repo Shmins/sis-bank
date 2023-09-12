@@ -162,4 +162,9 @@ public class ClientRepositoryImpl implements ClientRepository {
         return this.clientRepository.findByCard(number);
     }
 
+    @Override
+    public Client findByIdAccount(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findByIdAccount'");
+    }
+
 }

@@ -7,8 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,11 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.exception.GenericException;
+import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.Login;
+
 import com.bank.app.entity.client.model.cardmodel.Card;
-import com.bank.app.infrastructure.token.TokenService;
-import com.bank.app.infrastructure.token.TokenUserTdo;
+
+import com.bank.app.usecase.agency.AccountDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
 
@@ -39,11 +39,8 @@ import jakarta.annotation.security.RolesAllowed;
 public class ClientController {
     @Autowired
     private ClientService clientService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenService tokenService;
-    @PostMapping(value = "", produces = "application/json")
+
+    @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
@@ -57,7 +54,7 @@ public class ClientController {
                     data.getPhone(),
                     data.getAddress());
             Client result = this.clientService.createClient(client);
-           
+
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -65,11 +62,11 @@ public class ClientController {
         }
     }
 
-   /*  @PostMapping(value = "{cpf}", produces = "application/json")
+    @PostMapping(value = "{cpf}", produces = "application/json")
     public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientService.getClientById(cpf);
-            Account account = new Account(data.getNameComplete(), data.getTypeAccount(), data.getCpf());
+            Account account = new Account(data.getTypeAccount(), data.getNumberAgency());
             List<Account> ac = client.getAccount();
             ac.add(account);
             client.setAccount(ac);
@@ -80,7 +77,7 @@ public class ClientController {
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
-    } */
+    }
 
     @RolesAllowed("CLIENT")
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")
@@ -104,23 +101,7 @@ public class ClientController {
         }
     }
 
-    @PostMapping(value = "/login", produces = "application/json")
-    public ResponseEntity<?> loginClient(@RequestBody Login login) {
-        try {
-            var userAuthentication = new UsernamePasswordAuthenticationToken(
-                    login.cpf(), login.password());
-
-            var aut = this.authenticationManager.authenticate(userAuthentication);
-
-            var user = (Client) aut.getPrincipal();
-
-            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getCpf(), user.getRole()));
-
-            return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.valueOf(401));
-        }
-    }
+    
 
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAll() {

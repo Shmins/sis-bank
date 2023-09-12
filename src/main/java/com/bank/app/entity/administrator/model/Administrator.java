@@ -31,19 +31,16 @@ public class Administrator implements UserDetails{
 
     private String nameComplete;
 
-    private String bankAgency;
-
     private String role;
 
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
 
-    public Administrator(String cpf, String rg, String nameComplete, String password, String bankAgency) {
+    public Administrator(String cpf, String rg, String nameComplete, String password) {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
-
         if (rg.length() != 11) {
             throw new GenericException("RG com formato inválido");
         }
@@ -51,7 +48,6 @@ public class Administrator implements UserDetails{
         this.rg = rg;
         this.nameComplete = nameComplete;
         this.password = password;
-        this.bankAgency = bankAgency;
         this.role = "ROLE_ADM";
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();

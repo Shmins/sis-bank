@@ -17,4 +17,6 @@ public interface ClientRepository extends MongoRepository<Client, String>{
     List<Client> findByNameComplete(String nameComplete);
     @Query(value = "{'cards.numberCard': ?0}" )
     Client findByCard(String number);
+    @Query(value = "{'account._id': ?0}" )
+    Client findByIdAccount(String id);
 }

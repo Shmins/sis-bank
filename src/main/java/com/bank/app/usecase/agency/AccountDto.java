@@ -1,4 +1,6 @@
-package com.bank.app.usecase.account;
+package com.bank.app.usecase.agency;
+
+import com.bank.app.entity.client.model.NumberAgency;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +13,5 @@ public class AccountDto {
 
     private String typeAccount;
 
-    private String nameComplete;
-     // name of client /
-    private String cpf;
-
+    private NumberAgency numberAgency;
 }

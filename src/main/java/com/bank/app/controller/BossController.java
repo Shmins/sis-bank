@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,9 +25,7 @@ import com.bank.app.usecase.boss.BossService;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.bank.app.entity.boss.model.Boss;
-import com.bank.app.entity.client.model.Login;
-import com.bank.app.infrastructure.token.TokenService;
-import com.bank.app.infrastructure.token.TokenUserTdo;
+
 
 @RestController
 @RequestMapping("boss/v1")
@@ -38,13 +34,9 @@ import com.bank.app.infrastructure.token.TokenUserTdo;
 public class BossController {
     @Autowired
     private BossService bossService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenService tokenService;
 
     @RolesAllowed("BOSS")
-    @PostMapping(value = "", produces = "application/json")
+    @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveOfficial(@RequestBody BossDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
@@ -62,23 +54,7 @@ public class BossController {
         }
     }
    
-    @PostMapping(value = "/login", produces = "application/json")
-    public ResponseEntity<?> loginClient(@RequestBody Login login) {
-        try {
-            var userAuthentication = new UsernamePasswordAuthenticationToken(
-                    login.cpf(), login.password());
-
-            var aut = this.authenticationManager.authenticate(userAuthentication);
-
-            var user = (Boss) aut.getPrincipal();
-
-            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
-
-            return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.valueOf(401));
-        }
-    }
+    
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {

@@ -30,7 +30,7 @@ public class BorrowingController {
     @Autowired
     private BorrowingService borrowingService;
 
-    @PostMapping(value = "", produces = "application/json")
+    @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> postBorrowing(@RequestBody BorrowingTdo data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -52,7 +52,7 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-    @GetMapping(value = "")
+    @GetMapping(value = "/")
     public ResponseEntity<?> getBorrowingAllForClient() {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

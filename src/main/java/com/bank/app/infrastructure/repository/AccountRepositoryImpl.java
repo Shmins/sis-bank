@@ -11,130 +11,128 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
 
 
-import com.bank.app.entity.client.model.Account;
-import com.bank.app.entity.client.repository.AccountRepository;
+import com.bank.app.entity.client.model.NumberAgency;
+import com.bank.app.entity.client.repository.AgencyRepository;
 
-public class AccountRepositoryImpl implements AccountRepository {
+public class AccountRepositoryImpl implements AgencyRepository {
 
     @Override
-    public <S extends Account> S insert(S entity) {
-        throw new UnsupportedOperationException("Método não encontrado 'insert'");
+    public <S extends NumberAgency> S insert(S entity) {
+        throw new UnsupportedOperationException("Unimplemented method 'insert'");
     }
 
     @Override
-    public <S extends Account> List<S> insert(Iterable<S> entities) {
-        throw new UnsupportedOperationException("Método não encontrado 'insert'");
+    public <S extends NumberAgency> List<S> insert(Iterable<S> entities) {
+        throw new UnsupportedOperationException("Unimplemented method 'insert'");
     }
 
     @Override
-    public <S extends Account> List<S> findAll(Example<S> example) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll' com exemplo");
+    public <S extends NumberAgency> List<S> findAll(Example<S> example) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public <S extends Account> List<S> findAll(Example<S> example, Sort sort) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll' com classificador");
+    public <S extends NumberAgency> List<S> findAll(Example<S> example, Sort sort) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public <S extends Account> List<S> saveAll(Iterable<S> entities) {
-        throw new UnsupportedOperationException("Método não encontrado 'saveAll'");
+    public <S extends NumberAgency> List<S> saveAll(Iterable<S> entities) {
+        throw new UnsupportedOperationException("Unimplemented method 'saveAll'");
     }
 
     @Override
-    public List<Account> findAll() {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll'");
+    public List<NumberAgency> findAll() {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public List<Account> findAllById(Iterable<String> ids) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAllById'");
+    public List<NumberAgency> findAllById(Iterable<String> ids) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAllById'");
     }
 
     @Override
-    public <S extends Account> S save(S entity) {
-        throw new UnsupportedOperationException("Método não encontrado 'save'");
+    public <S extends NumberAgency> S save(S entity) {
+        throw new UnsupportedOperationException("Unimplemented method 'save'");
     }
 
     @Override
-    public Optional<Account> findById(String id) {
-        throw new UnsupportedOperationException("Método não encontrado 'findById'");
+    public Optional<NumberAgency> findById(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
     }
 
     @Override
     public boolean existsById(String id) {
-        throw new UnsupportedOperationException("Método não encontrado 'existsById'");
+        throw new UnsupportedOperationException("Unimplemented method 'existsById'");
     }
 
     @Override
     public long count() {
-        throw new UnsupportedOperationException("Método não encontrado 'count'");
+        throw new UnsupportedOperationException("Unimplemented method 'count'");
     }
 
     @Override
     public void deleteById(String id) {
-        throw new UnsupportedOperationException("Método não encontrado 'deleteById'");
+        throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
     }
 
     @Override
-    public void delete(Account entity) {
-        throw new UnsupportedOperationException("Método não encontrado 'delete'");
+    public void delete(NumberAgency entity) {
+        throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
     @Override
     public void deleteAllById(Iterable<? extends String> ids) {
-        throw new UnsupportedOperationException("Método não encontrado 'deleteAllById'");
+        throw new UnsupportedOperationException("Unimplemented method 'deleteAllById'");
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Account> entities) {
-        throw new UnsupportedOperationException("Método não encontrado 'deleteAll'");
+    public void deleteAll(Iterable<? extends NumberAgency> entities) {
+        throw new UnsupportedOperationException("Unimplemented method 'deleteAll'");
     }
 
     @Override
     public void deleteAll() {
-        throw new UnsupportedOperationException("Método não encontrado 'deleteAll'");
+        throw new UnsupportedOperationException("Unimplemented method 'deleteAll'");
     }
 
     @Override
-    public List<Account> findAll(Sort sort) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll' com somente classificador");
+    public List<NumberAgency> findAll(Sort sort) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public Page<Account> findAll(Pageable pageable) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll' com paginação");
+    public Page<NumberAgency> findAll(Pageable pageable) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public <S extends Account> Optional<S> findOne(Example<S> example) {
-        throw new UnsupportedOperationException("Método não encontrado 'findOne'");
+    public <S extends NumberAgency> Optional<S> findOne(Example<S> example) {
+        throw new UnsupportedOperationException("Unimplemented method 'findOne'");
     }
 
     @Override
-    public <S extends Account> Page<S> findAll(Example<S> example, Pageable pageable) {
-        throw new UnsupportedOperationException("Método não encontrado 'findAll'");
+    public <S extends NumberAgency> Page<S> findAll(Example<S> example, Pageable pageable) {
+        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
     @Override
-    public <S extends Account> long count(Example<S> example) {
-        throw new UnsupportedOperationException("Método não encontrado 'count'");
+    public <S extends NumberAgency> long count(Example<S> example) {
+        throw new UnsupportedOperationException("Unimplemented method 'count'");
     }
 
     @Override
-    public <S extends Account> boolean exists(Example<S> example) {
-        throw new UnsupportedOperationException("Método não encontrado 'exists'");
+    public <S extends NumberAgency> boolean exists(Example<S> example) {
+        throw new UnsupportedOperationException("Unimplemented method 'exists'");
     }
 
     @Override
-    public <S extends Account, R> R findBy(Example<S> example, Function<FetchableFluentQuery<S>, R> queryFunction) {
-        throw new UnsupportedOperationException("Método não encontrado 'findBy'");
+    public <S extends NumberAgency, R> R findBy(Example<S> example,
+            Function<FetchableFluentQuery<S>, R> queryFunction) {
+        throw new UnsupportedOperationException("Unimplemented method 'findBy'");
     }
 
-    @Override
-    public List<Account> findAllByCpf(String cpf) {
-        throw new UnsupportedOperationException("Unimplemented method 'findAllByCpf'");
-    }
+ 
 
    
 }
