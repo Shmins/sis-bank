@@ -1,9 +1,13 @@
 package com.bank.app.configurations;
 
+import java.util.Properties;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,10 +41,9 @@ public class Configurations {
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
-                        .requestMatchers("client/v1/login").permitAll()
-                        .requestMatchers("official/v1/login").permitAll()
-                        .requestMatchers("adm/v1/login").permitAll()
-                        .requestMatchers("boss/v1/login").permitAll()
+                        .requestMatchers("login/v1/").permitAll()
+                         .requestMatchers("email/v1/").permitAll()
+
 
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
@@ -48,7 +51,7 @@ public class Configurations {
                         .requestMatchers("official/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
 
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -62,5 +65,22 @@ public class Configurations {
     @Bean
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
+        
+        mailSender.setUsername("shmins.156@gmail.com");
+        mailSender.setPassword("hrxftjfbexelzeye");
+        
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+        
+        return mailSender;
     }
 }
