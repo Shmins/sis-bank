@@ -43,7 +43,7 @@ public class CodeEmailTemplate {
         "            border-bottom: 4px solid rgb(204, 204, 204);\r\n" + //
         "        }\r\n" + //
         "        .body .body_header p{\r\n" + //
-        "            font-size: 20px;\r\n" + //
+        "            font-size: 15px;\r\n" + //
         "            font-family: Arial, Helvetica, sans-serif;\r\n" + //
         "            text-align: center;\r\n" + //
         "        }\r\n" + //
@@ -86,7 +86,7 @@ public class CodeEmailTemplate {
         "        </div>\r\n" + //
         "        <div class=\"body\">\r\n" + //
         "            <div class=\"body_header\">\r\n" + //
-        "                <p>Bem vindo(a) "+ name +" a comunidade. <br> Recebemos sua solicitação.</p>\r\n" + //
+        "                <p>Obrigado por se cadastrar "+ name +". <br> Bem vindo(a) a comunidade.</p>\r\n" + //
         "            </div>\r\n" + //
         "            <div class=\"body_center\">\r\n" + //
         "                <div>\r\n" + //
@@ -96,7 +96,7 @@ public class CodeEmailTemplate {
         "            </div>\r\n" + //
         "            <div class=\"body_footer\">\r\n" + //
         "               <p>Caso não tenha se cadastrado, ignorar essa mensagem</p>\r\n" + //
-        "               <p>Obrigado, equipe <b>SwiftPay.</b></p>\r\n" + //
+        "               <p>Abraços, equipe <b>SwiftPay.</b></p>\r\n" + //
         "            </div>\r\n" + //
         "        </div>\r\n" + //
         "        <div class=\"footer\">\r\n" + //

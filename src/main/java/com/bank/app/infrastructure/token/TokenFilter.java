@@ -80,9 +80,7 @@ public class TokenFilter extends OncePerRequestFilter {
       }
 
     }
-    res.addHeader("Access-Control-Allow-Origin", "*");
-    res.addHeader("Access-Control-Allow-Methods", "*");
-    res.addHeader("Access-Control-Allow-Headers", "*");
+
     filterChain.doFilter(req, res);
   }
 

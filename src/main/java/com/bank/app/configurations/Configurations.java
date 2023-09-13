@@ -42,7 +42,7 @@ public class Configurations {
                         .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "login/v1/").permitAll()
-                        .requestMatchers(HttpMethod.POST, "email/v1/").permitAll()
+                        .requestMatchers("email/v1/**").permitAll()
 
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)

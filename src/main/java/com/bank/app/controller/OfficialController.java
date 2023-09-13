@@ -131,7 +131,6 @@ public class OfficialController {
 
     @RolesAllowed("BOSS")
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.officialService.deleteById(id);
