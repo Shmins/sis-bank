@@ -41,9 +41,8 @@ public class Configurations {
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
-                        .requestMatchers("login/v1/").permitAll()
-                         .requestMatchers("email/v1/").permitAll()
-
+                        .requestMatchers(HttpMethod.POST, "login/v1/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "email/v1/").permitAll()
 
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
                         .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
@@ -66,21 +65,22 @@ public class Configurations {
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        
+
         mailSender.setUsername("shmins.156@gmail.com");
         mailSender.setPassword("hrxftjfbexelzeye");
-        
+
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
-        
+
         return mailSender;
     }
 }

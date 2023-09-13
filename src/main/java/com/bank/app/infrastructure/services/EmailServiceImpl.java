@@ -13,10 +13,10 @@ public class EmailServiceImpl implements EmailService{
     @Autowired
     private JavaMailSender email;
     @Override
-    public void sendEmail(String from, String name, String to, String subject, String message) throws MessagingException {
+    public void sendEmail(String to, String subject, String message) throws MessagingException {
         MimeMessage  messages = this.email.createMimeMessage();
 
-        messages.setFrom("<" + name + ">");
+        messages.setFrom("<Shmins> shmins.156@gmail.com");
         messages.setRecipients(MimeMessage.RecipientType.TO, to);
         messages.setSubject(subject);
         messages.setContent(message,"text/html; charset=utf-8");
