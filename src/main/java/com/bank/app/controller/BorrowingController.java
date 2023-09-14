@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
+import com.bank.app.usecase.approve.ApproveService;
 import com.bank.app.usecase.borrowing.BorrowingService;
 import com.bank.app.usecase.borrowing.BorrowingTdo;
 
@@ -29,6 +31,8 @@ import com.bank.app.usecase.borrowing.BorrowingTdo;
 public class BorrowingController {
     @Autowired
     private BorrowingService borrowingService;
+    @Autowired
+    private ApproveService approveService;
 
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> postBorrowing(@RequestBody BorrowingTdo data) {
@@ -42,16 +46,32 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+    @PostMapping(value = "/approve/{id}", produces = "application/json")
+    public ResponseEntity<?> sendToApprove(@PathVariable("id") String id) {
+        try {
+            Borrowing result = this.borrowingService.getBorrowingById(id);
+            Approve borrowingApprove = new Approve(null, result, id, null, null, null, null, false, LocalDateTime.now(), LocalDateTime.now());
+            Approve approve = this.approveService.createApprove(borrowingApprove);
+
+
+            return new ResponseEntity<>(approve, HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.valueOf(500));
+        }
+    }
     @GetMapping(value = "/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getBorrowingAll() {
         try {
             List<Borrowing> result = this.borrowingService.getAll();
+
+            
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+
     @GetMapping(value = "/")
     public ResponseEntity<?> getBorrowingAllForClient() {
         try {

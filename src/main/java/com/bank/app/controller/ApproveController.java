@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.NumberAgency;
@@ -85,17 +86,26 @@ public class ApproveController {
         }
     }
 
-    @GetMapping(value = "/getAll")
+    @GetMapping(value = "/borrowing/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
-    public ResponseEntity<?> getApprovegAll() {
+    public ResponseEntity<?> getApproveBorrowingAll() {
         try {
-            var result = this.approveService.getAll();
+            List<ApproveBorrowing> result = this.approveService.getAllBorrowings();
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-
+    @GetMapping(value = "/borrowing/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getApproveCardsAll() {
+        try {
+            List<ApproveBorrowing> result = this.approveService.getAllBorrowings();
+            return new ResponseEntity<>(result, HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.valueOf(500));
+        }
+    }
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ApproveDto data) {
         try {
@@ -178,7 +188,7 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/account/{id}/{agency}")
+    @PutMapping(value = "/account/{id}")
     public ResponseEntity<?> approveAccount(@PathVariable("id") String id, @RequestBody NumberAgency agency) {
         try {
             Account account = this.clientService.getByIdAccountAfterActive(id, agency);

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
 import com.bank.app.entity.administrator.repository.ApproveRepository;
 import com.bank.app.usecase.approve.ApproveService;
 
@@ -43,5 +44,10 @@ public class ApproveServiceImpl implements ApproveService {
     @Override
     public Approve updateApprove(Approve approve){
         return approveRepository.save(approve);
+    }
+
+    @Override
+    public List<ApproveBorrowing> getAllBorrowings() {
+        return this.approveRepository.findAllBorrowing();
     }
 }

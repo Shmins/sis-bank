@@ -78,7 +78,7 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-
+    
     @RolesAllowed("CLIENT")
     @PostMapping(value = "/cards/{cpf}", produces = "application/json")
     public ResponseEntity<?> saveCards(@RequestBody Card data, @PathVariable("cpf") String cpf) {

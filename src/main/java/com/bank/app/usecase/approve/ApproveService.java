@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
 
 public interface ApproveService {
     Approve createApprove(Approve approve);
@@ -12,4 +13,5 @@ public interface ApproveService {
     Approve getApproveById(String cpf);
     List<Approve> getAll();
     Approve updateApprove(Approve approve);
+    List<ApproveBorrowing> getAllBorrowings();
 }
