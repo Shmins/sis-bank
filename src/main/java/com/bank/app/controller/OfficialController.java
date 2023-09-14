@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,10 +23,7 @@ import com.bank.app.usecase.official.OfficialService;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.official.model.Official;
-import com.bank.app.infrastructure.token.TokenService;
-import com.bank.app.infrastructure.token.TokenUserTdo;
 
 @RestController
 @RequestMapping("official/v1")
@@ -37,10 +32,6 @@ import com.bank.app.infrastructure.token.TokenUserTdo;
 public class OfficialController {
     @Autowired
     private OfficialService officialService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenService tokenService;
 
    /*  @RolesAllowed("BOSS") */
     @PostMapping(value = "", produces = "application/json")
@@ -64,23 +55,6 @@ public class OfficialController {
         }
     }
 
-    @PostMapping(value = "/login", produces = "application/json")
-    public ResponseEntity<?> loginClient(@RequestBody Login login) {
-        try {
-            var userAuthentication = new UsernamePasswordAuthenticationToken(
-                    login.cpf(), login.password());
-
-            var aut = this.authenticationManager.authenticate(userAuthentication);
-
-            var user = (Official) aut.getPrincipal();
-
-            String token = this.tokenService.token(new TokenUserTdo(user.getCpf(), user.getCpf(), user.getRole()));
-
-            return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.valueOf(401));
-        }
-    }
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {

@@ -39,4 +39,9 @@ public class Approve {
 
     private LocalDateTime updateAt;
 
+
+    public void main(){
+        this.createdAt = LocalDateTime.now();
+        this.updateAt = LocalDateTime.now();
+    }
 }

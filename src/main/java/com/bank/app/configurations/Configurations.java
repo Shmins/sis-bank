@@ -3,6 +3,7 @@ package com.bank.app.configurations;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,22 @@ public class Configurations {
     @Autowired
     private TokenFilter tokenFilter;
 
+    @Autowired
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Autowired
+    @Value("${spring.mail.username}")
+    private String password;
+
+    @Autowired
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Autowired
+    @Value("${spring.mail.port}")
+    private String port;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         String roleClient = "ROLE_CLIENT";
@@ -39,9 +56,11 @@ public class Configurations {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(HttpMethod.GET, "client/v1/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "login/v1/").permitAll()
+                        .requestMatchers("client/v1/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "approve/v1/").authenticated()
+                        .requestMatchers(HttpMethod.GET, "client/v1/getAll").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
+                        .requestMatchers("login/v1/").permitAll()
                         .requestMatchers("email/v1/**").permitAll()
 
                         .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
@@ -69,11 +88,11 @@ public class Configurations {
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+        mailSender.setHost(host);
+        mailSender.setPort(Integer.parseInt(port));
 
-        mailSender.setUsername("shmins.156@gmail.com");
-        mailSender.setPassword("hrxftjfbexelzeye");
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

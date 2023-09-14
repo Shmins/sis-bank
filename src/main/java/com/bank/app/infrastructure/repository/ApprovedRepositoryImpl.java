@@ -11,7 +11,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveAccount;
 import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
+import com.bank.app.entity.administrator.model.approve.ApproveCards;
+import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.administrator.repository.ApproveRepository;
 
 public class ApprovedRepositoryImpl implements ApproveRepository {
@@ -137,17 +140,17 @@ public class ApprovedRepositoryImpl implements ApproveRepository {
     }
 
     @Override
-    public List<ApproveBorrowing> findAllCards() {
+    public List<ApproveCards> findAllCards() {
         throw new UnsupportedOperationException("Unimplemented method 'findAllCards'");
     }
 
     @Override
-    public List<ApproveBorrowing> findAllOfficial() {
+    public List<ApproveOfficial> findAllOfficial() {
         throw new UnsupportedOperationException("Unimplemented method 'findAllOfficial'");
     }
 
     @Override
-    public List<ApproveBorrowing> findAllAccount() {
+    public List<ApproveAccount> findAllAccount() {
         throw new UnsupportedOperationException("Unimplemented method 'findAllAccount'");
     }
     

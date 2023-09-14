@@ -16,6 +16,7 @@ public class Card {
 
     @Id
     private String numberCard;
+    
     @Indexed(unique = true)
     private int cvc;
  
@@ -34,19 +35,12 @@ public class Card {
     private LocalDateTime updateAt;
 
     public Card(String numberCard, int cvc, TypeCard typeCard, String nameComplete, String typeIssuer,
-            String validityDate){
+            String validityDate, Boolean isActive){
         if (cvc <= 100) {
             throw new IllegalArgumentException("CVC com formato errado");
         }
         if (!numberCard.matches("\\d{4}\\ \\d{4}\\ \\d{4}\\ \\d{4}")) {
             throw new IllegalArgumentException("Número de cartão inválido");
-        }
-        if(!numberCard.substring(0, 2).equals("51") || !numberCard.substring(0, 2).equals("55") //MasterCard
-        && !numberCard.substring(0, 1).equals("4") //Visa
-        && !numberCard.substring(0, 2).equals("34") || !numberCard.substring(0, 2).equals("37") 
-        && !numberCard.substring(0, 1).equals("3")
-        && !numberCard.equals("American_Express")){
-            throw new IllegalArgumentException("Tipo de cartão inválido");
         }
         this.nameComplete = nameComplete;
         this.typeCard = typeCard;
@@ -55,7 +49,7 @@ public class Card {
         this.numberCard = numberCard;
         this.cvc = cvc;
         this.validityDate = validityDate;
-        this.isActive = false;
+        this.isActive = isActive;
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
     }

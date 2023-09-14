@@ -18,7 +18,7 @@ public class TokenService {
                 .withSubject(user.Username())
                 .withClaim("cpf", user.cpf())
                 .withIssuer(user.role())
-                .withExpiresAt(LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.of("-03:00")))
+                .withExpiresAt(LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00")))
                 .sign(Algorithm.HMAC256(password));
     }
     

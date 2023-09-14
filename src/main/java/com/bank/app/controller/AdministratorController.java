@@ -42,7 +42,8 @@ public class AdministratorController {
                     data.getCpf(),
                     data.getRg(),
                     data.getNameComplete(),
-                    data.getPassword()
+                    data.getPassword(),
+                    data.getBankAgency()
                     );
             Administrator result = this.administratorService.createAdministrator(adm);
 

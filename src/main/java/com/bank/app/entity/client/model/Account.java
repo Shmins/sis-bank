@@ -24,17 +24,20 @@ public class Account {
 
     private NumberAgency numberAgency;
 
+    private String cpf;
+
     private Boolean isActive;
 
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
 
-    public Account(String typeAccount, NumberAgency numberAgency){
+    public Account(String typeAccount, NumberAgency numberAgency, String cpf){
          if(!typeAccount.equals("chain") && !typeAccount.equals("savings")){
             throw new GenericException("Tipo de conta inválido");
         }
         this.numberAgency = numberAgency;
+        this.cpf = cpf;
         this.typeAccount = typeAccount;
         this.isActive = false;
         this.createAt = LocalDateTime.now();

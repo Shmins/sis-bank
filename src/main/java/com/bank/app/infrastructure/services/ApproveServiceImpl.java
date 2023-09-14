@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveAccount;
 import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
+import com.bank.app.entity.administrator.model.approve.ApproveCards;
+import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.administrator.repository.ApproveRepository;
 import com.bank.app.usecase.approve.ApproveService;
 
@@ -15,6 +18,7 @@ import com.bank.app.usecase.approve.ApproveService;
 public class ApproveServiceImpl implements ApproveService {
     @Autowired
     private ApproveRepository approveRepository;
+
     @Override
     public Approve createApprove(Approve approve) {
         return this.approveRepository.insert(approve);
@@ -31,7 +35,7 @@ public class ApproveServiceImpl implements ApproveService {
     }
 
     @Override
-   public Approve getApproveById(String id) {
+    public Approve getApproveById(String id) {
         Optional<Approve> borrowing = this.approveRepository.findById(id);
         return borrowing.isPresent() ? borrowing.get() : null;
     }
@@ -42,12 +46,29 @@ public class ApproveServiceImpl implements ApproveService {
     }
 
     @Override
-    public Approve updateApprove(Approve approve){
+    public Approve updateApprove(Approve approve) {
         return approveRepository.save(approve);
     }
 
     @Override
     public List<ApproveBorrowing> getAllBorrowings() {
         return this.approveRepository.findAllBorrowing();
+    }
+
+    @Override
+    public List<ApproveCards> getAllCards() {
+        return this.approveRepository.findAllCards();
+    }
+
+    @Override
+    public List<ApproveOfficial> getAllOfficial() {
+        return this.approveRepository.findAllOfficial();
+
+    }
+
+    @Override
+    public List<ApproveAccount> getAllAccount() {
+        return this.approveRepository.findAllAccount();
+
     }
 }

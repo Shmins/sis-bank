@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.exception.CpfException;
 import com.bank.app.entity.client.exception.GenericException;
+import com.bank.app.entity.client.model.NumberAgency;
 
 import lombok.Data;
 import lombok.Getter;
@@ -29,6 +30,8 @@ public class Administrator implements UserDetails{
 
     private String password;
 
+    private NumberAgency numberAgency;
+
     private String nameComplete;
 
     private String role;
@@ -37,7 +40,7 @@ public class Administrator implements UserDetails{
 
     private LocalDateTime updateAt;
 
-    public Administrator(String cpf, String rg, String nameComplete, String password) {
+    public Administrator(String cpf, String rg, String nameComplete, String password, NumberAgency numberAgency) {
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
@@ -46,6 +49,7 @@ public class Administrator implements UserDetails{
         }
         this.cpf = cpf;
         this.rg = rg;
+        this.numberAgency = numberAgency;
         this.nameComplete = nameComplete;
         this.password = password;
         this.role = "ROLE_ADM";

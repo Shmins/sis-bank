@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveAccount;
 import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
+import com.bank.app.entity.administrator.model.approve.ApproveCards;
+import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.NumberAgency;
@@ -96,16 +99,37 @@ public class ApproveController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-    @GetMapping(value = "/borrowing/getAll")
+    @GetMapping(value = "/cards/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getApproveCardsAll() {
         try {
-            List<ApproveBorrowing> result = this.approveService.getAllBorrowings();
+            List<ApproveCards> result = this.approveService.getAllCards();
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+    @GetMapping(value = "/official/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getApproveOffcialAll() {
+        try {
+            List<ApproveOfficial> result = this.approveService.getAllOfficial();
+            return new ResponseEntity<>(result, HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.valueOf(500));
+        }
+    }
+    @GetMapping(value = "/account/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getApproveAccountAll() {
+        try {
+            List<ApproveAccount> result = this.approveService.getAllAccount();
+            return new ResponseEntity<>(result, HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.valueOf(500));
+        }
+    }
+    
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ApproveDto data) {
         try {

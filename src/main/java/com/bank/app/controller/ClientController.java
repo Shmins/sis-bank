@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
@@ -27,10 +28,10 @@ import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.cardmodel.Card;
 
 import com.bank.app.usecase.agency.AccountDto;
+import com.bank.app.usecase.approve.ApproveService;
+import com.bank.app.usecase.client.CardDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
-
-import jakarta.annotation.security.RolesAllowed;
 
 @Controller
 @RestController
@@ -39,6 +40,8 @@ import jakarta.annotation.security.RolesAllowed;
 public class ClientController {
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private ApproveService approveService;
 
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto data) {
@@ -62,36 +65,37 @@ public class ClientController {
         }
     }
 
-    @PostMapping(value = "{cpf}", produces = "application/json")
-    public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
+    @PostMapping(value = "/approve/{cpf}", produces = "application/json")
+    public ResponseEntity<?> approveAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
-            Client client = this.clientService.getClientById(cpf);
-            Account account = new Account(data.getTypeAccount(), data.getNumberAgency());
-            List<Account> ac = client.getAccount();
-            ac.add(account);
-            client.setAccount(ac);
-            Client result = this.clientService.updateClient(client);
+            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), data.getCpf());
 
+            Approve result = this.approveService.createApprove(
+                    new Approve(null,
+                            null,
+                            cpf,
+                            account,
+                            null,
+                            null,
+                            "account",
+                            false,
+                            null,
+                            null));
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-    
-    @RolesAllowed("CLIENT")
-    @PostMapping(value = "/cards/{cpf}", produces = "application/json")
-    public ResponseEntity<?> saveCards(@RequestBody Card data, @PathVariable("cpf") String cpf) {
+
+    @PostMapping(value = "/account/{cpf}", produces = "application/json")
+    public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientService.getClientById(cpf);
-            if (client.getCards().size() == 6) {
-                throw new GenericException("limite de cartões exedido");
-            }
-            List<Card> cards = client.getCards().isEmpty() ? new ArrayList<>() : client.getCards();
-
-            cards.add(data);
-
-            client.setCards(cards);
+            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), data.getCpf());
+            List<Account> ac = client.getAccount();
+            ac.add(account);
+            client.setAccount(ac);
             Client result = this.clientService.updateClient(client);
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
 
@@ -101,7 +105,43 @@ public class ClientController {
         }
     }
 
-    
+    @PostMapping(value = "/cards/add", produces = "application/json")
+    public ResponseEntity<?> saveCards(@RequestBody Card data) {
+        try {
+            Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (client.getCards().size() == 6) {
+                throw new GenericException("limite de cartões exedido");
+            }
+            List<Card> cards = client.getCards().isEmpty() ? new ArrayList<>() : client.getCards();
+            for (Card i : cards){
+                if(i.getNumberCard().equals(data.getNumberCard()) || i.getCvc() == data.getCvc()){
+                    throw new IllegalArgumentException("Número de cartão ou CVC duplicado");
+                }
+            }
+            cards.add(data);
+
+            client.setCards(cards);
+            Client update = this.clientService.updateClient(client);
+            if (update != null && data.isActive()) {
+                this.approveService.createApprove(
+                        new Approve(null,
+                                null,
+                                client.getCpf(),
+                                null,
+                                data,
+                                null,
+                                "cards",
+                                false,
+                                null,
+                                null));
+            }
+            return new ResponseEntity<>(data.isActive(), HttpStatus.valueOf(200));
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+
+        }
+    }
 
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAll() {
@@ -166,22 +206,21 @@ public class ClientController {
     }
 
     @PutMapping(value = "/cards/{number}", produces = "application/json")
-    public ResponseEntity<?> updateCardById(@PathVariable("number") String number, @RequestBody Card data) {
+    public ResponseEntity<?> updateCardById(@PathVariable("number") String number, @RequestBody CardDto data) {
         try {
             Client client = this.clientService.getCardClient(number);
 
             Card card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard())).toList().get(0);
 
-            card.setNumberCard(data.getNumberCard() != null ? data.getNumberCard() : card.getNumberCard());
-            card.setTypeIssuer(data.getTypeIssuer() != null ? data.getTypeIssuer() : card.getTypeIssuer());
-            card.setValidityDate(data.getValidityDate() != null ? data.getValidityDate() : card.getValidityDate());
-            card.setTypeCard(data.getTypeCard() != null ? data.getTypeCard() : card.getTypeCard());
+            card.setTypeIssuer(data.typeIssuer() != null ? data.typeIssuer() : card.getTypeIssuer());
+            card.setValidityDate(data.validityDate() != null ? data.validityDate() : card.getValidityDate());
+            card.setTypeCard(data.typeCard() != null ? data.typeCard() : card.getTypeCard());
             card.setUpdateAt(LocalDateTime.now());
 
             var cards = client.getCards().stream().filter(res -> !number.equals(res.getNumberCard())).toList();
             client.setCards(cards);
             this.clientService.updateClient(client);
-            return new ResponseEntity<>(cards, HttpStatus.valueOf(200));
+            return new ResponseEntity<>(number, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }

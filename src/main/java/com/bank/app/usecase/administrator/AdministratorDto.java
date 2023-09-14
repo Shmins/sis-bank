@@ -1,5 +1,7 @@
 package com.bank.app.usecase.administrator;
 
+import com.bank.app.entity.client.model.NumberAgency;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +17,7 @@ public class AdministratorDto {
 
     private String nameComplete;
 
-    private String bankAgency;
+    private NumberAgency bankAgency;
 
     private String password;
 
