@@ -7,10 +7,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,10 +33,11 @@ import com.bank.app.usecase.client.CardDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @Controller
 @RestController
 @RequestMapping("client/v1")
-@CrossOrigin(origins = "*")
 public class ClientController {
     @Autowired
     private ClientService clientService;
@@ -64,16 +65,18 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-
-    @PostMapping(value = "/approve/{cpf}", produces = "application/json")
-    public ResponseEntity<?> approveAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
+    @RolesAllowed("CLIENT")
+    @PostMapping(value = "/approve/account", produces = "application/json")
+    public ResponseEntity<?> approveAccount(@RequestBody AccountDto data) {
         try {
-            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), data.getCpf());
+
+            Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
 
             Approve result = this.approveService.createApprove(
                     new Approve(null,
                             null,
-                            cpf,
+                            client.getCpf(),
                             account,
                             null,
                             null,
@@ -87,11 +90,15 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-
+    
     @PostMapping(value = "/account/{cpf}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientService.getClientById(cpf);
+            if(client.getAccount().size() == client.getAccountLimit()){
+                throw new IllegalArgumentException("Máximo de contas alcançado");
+            }
             Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), data.getCpf());
             List<Account> ac = client.getAccount();
             ac.add(account);
@@ -106,6 +113,7 @@ public class ClientController {
     }
 
     @PostMapping(value = "/cards/add", produces = "application/json")
+    @RolesAllowed("CLIENT")
     public ResponseEntity<?> saveCards(@RequestBody Card data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -113,8 +121,8 @@ public class ClientController {
                 throw new GenericException("limite de cartões exedido");
             }
             List<Card> cards = client.getCards().isEmpty() ? new ArrayList<>() : client.getCards();
-            for (Card i : cards){
-                if(i.getNumberCard().equals(data.getNumberCard()) || i.getCvc() == data.getCvc()){
+            for (Card i : cards) {
+                if (i.getNumberCard().equals(data.getNumberCard()) || i.getCvc() == data.getCvc()) {
                     throw new IllegalArgumentException("Número de cartão ou CVC duplicado");
                 }
             }
@@ -135,7 +143,7 @@ public class ClientController {
                                 null,
                                 null));
             }
-            return new ResponseEntity<>(data.isActive(), HttpStatus.valueOf(200));
+            return new ResponseEntity<>(update, HttpStatus.valueOf(200));
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -144,12 +152,36 @@ public class ClientController {
     }
 
     @GetMapping(value = "/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getAll() {
         List<Client> clients = this.clientService.getAll();
         return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/cards/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getAllCards() {
+        List<Client> clients = this.clientService.getAll();
+        List<Card> cards = new ArrayList<>();
+        for (int i = 0; i < clients.size(); i++) {
+            clients.get(i).getCards().forEach(cards::add);
+        }
+        return new ResponseEntity<>(cards, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/accounts/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getAllAccounts() {
+        List<Client> clients = this.clientService.getAll();
+        List<Account> accounts = new ArrayList<>();
+        for (int i = 0; i < clients.size(); i++) {
+            clients.get(i).getAccount().forEach(accounts::add);
+        }
+        return new ResponseEntity<>(accounts, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/cards/cpf/{cpf}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> getAllCardsByCpf(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientService.getClientById(cpf);
@@ -161,6 +193,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/cards/{number}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getCardByNumberCard(@PathVariable("number") String number) {
         try {
             Client client = this.clientService.getCardClient(number);
@@ -172,6 +205,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/cpf/{cpf}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientService.getClientById(cpf);
@@ -184,6 +218,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/email/{email}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> getByEmail(@PathVariable("email") String email) {
         try {
             List<Client> clients = this.clientService.getClientByEmail(email);
@@ -195,6 +230,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/email/{nameComplete}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getByNameComplete(@PathVariable("nameComplete") String nameComplete) {
         try {
             List<Client> clients = this.clientService.getClientByNameComplete(nameComplete);
@@ -206,27 +242,29 @@ public class ClientController {
     }
 
     @PutMapping(value = "/cards/{number}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> updateCardById(@PathVariable("number") String number, @RequestBody CardDto data) {
         try {
             Client client = this.clientService.getCardClient(number);
+            List<Card> cards = client.getCards();
 
-            Card card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard())).toList().get(0);
-
-            card.setTypeIssuer(data.typeIssuer() != null ? data.typeIssuer() : card.getTypeIssuer());
+            Card card = cards.stream().filter(res -> res.getNumberCard().equals(number)).toList().get(0);
+            cards.remove(card);
+            card.setNameComplete(data.nameComplete() != null ? data.nameComplete() : card.getNameComplete());
             card.setValidityDate(data.validityDate() != null ? data.validityDate() : card.getValidityDate());
             card.setTypeCard(data.typeCard() != null ? data.typeCard() : card.getTypeCard());
             card.setUpdateAt(LocalDateTime.now());
-
-            var cards = client.getCards().stream().filter(res -> !number.equals(res.getNumberCard())).toList();
+            cards.add(card);
             client.setCards(cards);
             this.clientService.updateClient(client);
-            return new ResponseEntity<>(number, HttpStatus.valueOf(200));
+            return new ResponseEntity<>(cards, HttpStatus.valueOf(200));
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+            return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
 
     @PutMapping(value = "/{id}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ClientDto data) {
         try {
             Client client = this.clientService.getClientById(id);
@@ -237,6 +275,7 @@ public class ClientController {
             client.setEmail(data.getEmail() != null ? data.getEmail() : client.getEmail());
             client.setPhone(data.getPhone() != null ? data.getPhone() : client.getPhone());
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
+            client.setAccountLimit(data.getAccountLimit() != null? data.getAccountLimit(): client.getAccountLimit());
             client.setUpdateAt(LocalDateTime.now());
 
             Client update = this.clientService.updateClient(client);
@@ -248,6 +287,7 @@ public class ClientController {
     }
 
     @DeleteMapping(value = "/{id}")
+    @RolesAllowed("CLIENT")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.clientService.deleteById(id);
@@ -258,6 +298,7 @@ public class ClientController {
     }
 
     @DeleteMapping(value = "/cards/{number}")
+    @RolesAllowed("CLIENT")
     public ResponseEntity<?> deleteCardById(@PathVariable("number") String number) {
         try {
             Client client = this.clientService.getCardClient(number);

@@ -32,6 +32,8 @@ public class Client implements UserDetails {
     private Address address;
 
     private BorrowedLimit borrowedLimit;
+
+    private Integer accountLimit;
     
     private List<Card> cards = new ArrayList<>();
 
@@ -56,6 +58,7 @@ public class Client implements UserDetails {
         this.account = account;
         this.phone = phone;
         this.address = address;
+        this.accountLimit = 3;
         this.role = "ROLE_CLIENT";
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();

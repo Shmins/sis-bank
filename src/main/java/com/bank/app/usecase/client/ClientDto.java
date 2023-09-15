@@ -29,4 +29,5 @@ public class ClientDto {
 
     private Address address;
 
+    private Integer accountLimit;
 }

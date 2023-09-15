@@ -1,5 +1,6 @@
 package com.bank.app.configurations;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import com.bank.app.infrastructure.token.TokenFilter;
 
@@ -48,29 +50,24 @@ public class Configurations {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        String roleClient = "ROLE_CLIENT";
-        String roleOfficial = "ROLE_OFFICIAL";
-        String roleAdm = "ROLE_ADM";
-        String roleBoss = "ROLE_BOSS";
 
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(HttpMethod.POST, "client/v1/**").permitAll()
-                        .requestMatchers("client/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "approve/v1/").authenticated()
-                        .requestMatchers(HttpMethod.GET, "client/v1/getAll").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
-                        .requestMatchers("login/v1/").permitAll()
-                        .requestMatchers("email/v1/**").permitAll()
-
-                        .requestMatchers("borrowing/v1/**").hasAnyAuthority(roleClient, roleOfficial, roleAdm, roleBoss)
-                        .requestMatchers("approve/v1/**").hasAnyAuthority(roleAdm, roleBoss, roleOfficial)
-                        .requestMatchers("adm/v1/**").hasAnyAuthority(roleAdm, roleBoss)
-                        .requestMatchers("official/v1/**").hasAnyAuthority(roleOfficial, roleAdm, roleBoss)
-                        .requestMatchers("boss/v1/**").hasAnyAuthority(roleBoss)
+                        .requestMatchers(HttpMethod.POST, "client/v1/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "login/v1/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "email/v1/**").permitAll()
 
                         .anyRequest().authenticated())
-                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(res -> res.configurationSource(req -> {
+                    var cors = new CorsConfiguration();
+                    cors.setAllowedOrigins(
+                            List.of("http://localhost:3000"));
+                    cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+                    cors.setAllowedHeaders(List.of("*"));
+                    return cors;
+                }));
         return http.build();
     }
 

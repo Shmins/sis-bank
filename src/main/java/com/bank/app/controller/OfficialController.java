@@ -18,22 +18,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bank.app.usecase.approve.ApproveService;
 import com.bank.app.usecase.official.OfficialDto;
 import com.bank.app.usecase.official.OfficialService;
 
 import jakarta.annotation.security.RolesAllowed;
 
+import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.official.model.Official;
 
 @RestController
 @RequestMapping("official/v1")
 @CrossOrigin("*")
-
 public class OfficialController {
     @Autowired
     private OfficialService officialService;
+    @Autowired
+    private ApproveService approveService;
 
-   /*  @RolesAllowed("BOSS") */
+    @RolesAllowed("BOSS")
     @PostMapping(value = "", produces = "application/json")
     public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data) {
         try {
@@ -47,6 +50,20 @@ public class OfficialController {
                     data.getPassword(),
                     data.getAddress());
             Official result = this.officialService.createOfficial(official);
+
+            if(result != null && result.getIsAuthorized()){
+                 this.approveService.createApprove(
+                    new Approve(null,
+                            null,
+                            result.getCpf(),
+                            null,
+                            null,
+                            result.getEmail(),
+                            "official",
+                            false,
+                            null,
+                            null));
+            }
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -77,7 +94,6 @@ public class OfficialController {
 
         }
     }
-    @RolesAllowed("BOSS")
     @PutMapping(value = "/{id}", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody OfficialDto data) {

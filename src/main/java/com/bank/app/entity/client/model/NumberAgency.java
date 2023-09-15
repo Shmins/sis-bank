@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 @Document(collection = "agency")
 public class NumberAgency {
+        
     private String number;
 
     private String nameAgency;
