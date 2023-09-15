@@ -14,6 +14,4 @@ public class AccountDto {
     private String typeAccount;
 
     private NumberAgency numberAgency;
-
-    private String cpf;
 }

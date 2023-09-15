@@ -26,23 +26,25 @@ import com.bank.app.entity.administrator.model.approve.ApproveCards;
 import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.NumberAgency;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.official.model.Official;
+import com.bank.app.usecase.agency.AccountDto;
 import com.bank.app.usecase.approve.ApproveDto;
 
 import com.bank.app.usecase.approve.ApproveService;
 
 import com.bank.app.usecase.borrowing.BorrowingService;
 import com.bank.app.usecase.client.ClientService;
+import com.bank.app.usecase.email.EmailAccountDto;
+import com.bank.app.usecase.email.EmailService;
 import com.bank.app.usecase.official.OfficialService;
 
+import jakarta.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("approve/v1")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
 public class ApproveController {
     @Autowired
     private ApproveService approveService;
@@ -52,6 +54,8 @@ public class ApproveController {
     private OfficialService officialService;
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveApprove(@RequestBody ApproveDto data) {
@@ -77,6 +81,7 @@ public class ApproveController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") String id) {
         try {
@@ -90,7 +95,7 @@ public class ApproveController {
     }
 
     @GetMapping(value = "/borrowing/getAll")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> getApproveBorrowingAll() {
         try {
             List<ApproveBorrowing> result = this.approveService.getAllBorrowings();
@@ -99,8 +104,9 @@ public class ApproveController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+
     @GetMapping(value = "/cards/getAll")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> getApproveCardsAll() {
         try {
             List<ApproveCards> result = this.approveService.getAllCards();
@@ -109,8 +115,9 @@ public class ApproveController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+
     @GetMapping(value = "/official/getAll")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> getApproveOffcialAll() {
         try {
             List<ApproveOfficial> result = this.approveService.getAllOfficial();
@@ -119,6 +126,7 @@ public class ApproveController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
+
     @GetMapping(value = "/account/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getApproveAccountAll() {
@@ -129,7 +137,7 @@ public class ApproveController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-    
+
     @PutMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody ApproveDto data) {
         try {
@@ -156,6 +164,7 @@ public class ApproveController {
     }
 
     @PutMapping(value = "/borrowing/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> approveBorrowing(@PathVariable("id") String id) {
         try {
             Borrowing borrowing = this.borrowingService.getBorrowingById(id);
@@ -172,6 +181,7 @@ public class ApproveController {
     }
 
     @PutMapping(value = "/cards/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> approveCards(@PathVariable("id") String id) {
         try {
 
@@ -194,6 +204,7 @@ public class ApproveController {
     }
 
     @PutMapping(value = "/official/{id}")
+    @RolesAllowed("BOSS")
     public ResponseEntity<?> approveOfficial(@PathVariable("id") String id) {
         try {
             UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -212,15 +223,41 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/account/{id}")
-    public ResponseEntity<?> approveAccount(@PathVariable("id") String id, @RequestBody NumberAgency agency) {
+    @PutMapping(value = "/account/{decision}/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+    public ResponseEntity<?> approveAccount(@PathVariable("decision") Boolean decision,
+            @PathVariable("id") String id, @RequestBody AccountDto data) {
         try {
-            Account account = this.clientService.getByIdAccountAfterActive(id, agency);
-            return new ResponseEntity<>(account, HttpStatus.OK);
+            if (Boolean.TRUE.equals(decision) && id != null) {
+                Approve approve = this.approveService.getApproveById(id);
+                Client client = this.clientService.getClientById(approve.getCpfCreatedReq());
+                List<Account> accounts = client.getAccount();
+                Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
+                accounts.add(account);
+                client.setAccount(accounts);
+                this.clientService.updateClient(client);
+                this.approveService.deleteById(id);
+
+
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                true,
+                                client.getEmail(), "Resultado do pedido de abertura de conta"));
+            } else {
+                Approve approve = this.approveService.getApproveById(id);
+                Client client = this.clientService.getClientById(approve.getCpfCreatedReq());
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                false,
+                                client.getEmail(), "Resultado do pedido de abertura de conta"));
+
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
-
         }
     }
 

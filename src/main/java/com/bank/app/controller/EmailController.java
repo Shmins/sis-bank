@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.model.email.EmailCode;
 import com.bank.app.entity.client.repository.CodeEmailRepository;
-import com.bank.app.usecase.email.CodeEmailTemplate;
+import com.bank.app.usecase.email.EmailAccountDto;
 import com.bank.app.usecase.email.EmailCodeDto;
 import com.bank.app.usecase.email.EmailService;
 
@@ -28,24 +28,17 @@ import com.bank.app.usecase.email.EmailService;
 public class EmailController {
     @Autowired
     private EmailService emailSend;
-    @Autowired 
-    private CodeEmailTemplate codeEmailTemplate;
+
     @Autowired
     private CodeEmailRepository codeEmailRepository;
 
-    @PostMapping(value = "/", produces = "application/json")
-    public ResponseEntity<?> sendEmail(@RequestBody EmailCodeDto data ) {
- 
-        String code = String.valueOf(data.code());
-
-        code = code.substring(0, 3) + "-" + code.substring(3, 6);
-        
-        String template = this.codeEmailTemplate.getTemplate(data.name(), code);
+    @PostMapping(value = "/code/", produces = "application/json")
+    public ResponseEntity<?> sendEmailCode(@RequestBody EmailCodeDto data ) {
         try {
             this.emailSend.sendEmail(
                  data.to(), 
                  data.subject(), 
-                 template);
+                 data);
             EmailCode result = this.codeEmailRepository.save(new EmailCode(data.code()));
             return new ResponseEntity<>(result.getId(), HttpStatus.valueOf(200));
 
@@ -53,7 +46,18 @@ public class EmailController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(400));
         }
     }
-    @GetMapping(value = "/{id}")
+    @PostMapping(value = "/account/", produces = "application/json")
+    public ResponseEntity<?> sendEmailAccount(@RequestBody EmailAccountDto data ) {
+        try {
+            this.emailSend.sendEmailAccount(
+                 data);
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.valueOf(400));
+        }
+    }
+    @GetMapping(value = "code/{id}")
     public ResponseEntity<?> getCode(@PathVariable("id") String id) {
         try {
             Optional<EmailCode> code = this.codeEmailRepository.findById(id);
@@ -63,7 +67,7 @@ public class EmailController {
         }
 
     }
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "code/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.codeEmailRepository.deleteById(id);

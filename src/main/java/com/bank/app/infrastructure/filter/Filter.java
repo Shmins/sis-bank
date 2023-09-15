@@ -1,4 +1,4 @@
-package com.bank.app.infrastructure.token;
+package com.bank.app.infrastructure.filter;
 
 import java.io.IOException;
 
@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.usecase.administrator.AdministratorService;
 import com.bank.app.usecase.boss.BossService;
 import com.bank.app.usecase.client.ClientService;
@@ -20,7 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class TokenFilter extends OncePerRequestFilter {
+public class Filter extends OncePerRequestFilter {
   @Autowired
   private TokenService tokenService;
   @Autowired

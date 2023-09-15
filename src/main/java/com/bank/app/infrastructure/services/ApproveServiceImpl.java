@@ -71,4 +71,29 @@ public class ApproveServiceImpl implements ApproveService {
         return this.approveRepository.findAllAccount();
 
     }
+
+    @Override
+    public List<ApproveBorrowing> getByBorrowing(String id) {
+        return this.approveRepository.findByBorrowing(id);
+
+    }
+
+    @Override
+    public List<ApproveCards> getByCards(String id) {
+        return this.approveRepository.findByCards(id);
+
+    }
+
+    @Override
+    public List<ApproveOfficial> getByOfficial(String id) {
+
+        return this.approveRepository.findByOfficial(id);
+
+    }
+
+    @Override
+    public List<ApproveAccount> getByAccount(String id) {
+        return this.approveRepository.findByAccount(id);
+
+    }
 }

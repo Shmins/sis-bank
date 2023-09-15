@@ -99,7 +99,7 @@ public class ClientController {
             if(client.getAccount().size() == client.getAccountLimit()){
                 throw new IllegalArgumentException("Máximo de contas alcançado");
             }
-            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), data.getCpf());
+            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
             List<Account> ac = client.getAccount();
             ac.add(account);
             client.setAccount(ac);
@@ -129,6 +129,50 @@ public class ClientController {
             cards.add(data);
 
             client.setCards(cards);
+            Client update = this.clientService.updateClient(client);
+            if (update != null && data.isActive()) {
+                this.approveService.createApprove(
+                        new Approve(null,
+                                null,
+                                client.getCpf(),
+                                null,
+                                data,
+                                null,
+                                "cards",
+                                false,
+                                null,
+                                null));
+            }
+            return new ResponseEntity<>(update, HttpStatus.valueOf(200));
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+
+        }
+    }
+    @PostMapping(value = "/account/cards/{id}", produces = "application/json")
+    @RolesAllowed("CLIENT")
+    public ResponseEntity<?> saveCardsAccount(@PathVariable("id") String id, @RequestBody Card data) {
+        try {
+            Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+           
+            List<Account> accounts = client.getAccount();
+            Account account = accounts.stream().filter(res -> res.getId().equals(id)).toList().get(0);
+            List<Card> cards =  account.getCards();
+             if (cards.size() == 2) {
+                throw new GenericException("limite de cartões exedido");
+            }
+            for (Card i : cards) {
+                if (i.getNumberCard().equals(data.getNumberCard()) || i.getCvc() == data.getCvc()) {
+                    throw new IllegalArgumentException("Número de cartão ou CVC duplicado");
+                }
+            }
+
+            cards.add(data);
+            accounts.remove(account);
+            account.setCards(cards);
+            accounts.add(account);
+            client.setAccount(accounts);
             Client update = this.clientService.updateClient(client);
             if (update != null && data.isActive()) {
                 this.approveService.createApprove(

@@ -153,5 +153,26 @@ public class ApprovedRepositoryImpl implements ApproveRepository {
     public List<ApproveAccount> findAllAccount() {
         throw new UnsupportedOperationException("Unimplemented method 'findAllAccount'");
     }
+
+    @Override
+    public List<ApproveBorrowing> findByBorrowing(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findByBorrowing'");
+    }
+
+    @Override
+    public List<ApproveOfficial> findByOfficial(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findByOfficial'");
+    }
+
+    @Override
+    public List<ApproveAccount> findByAccount(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findByAccount'");
+    }
+
+    @Override
+    public List<ApproveCards> findByCards(String id) {
+
+        throw new UnsupportedOperationException("Unimplemented method 'findByCards'");
+    }
     
 }

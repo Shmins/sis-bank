@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ApproveBorrowing {
+    private String id;
+    
     private Borrowing borrowing;
 
     private Boolean isApproved;

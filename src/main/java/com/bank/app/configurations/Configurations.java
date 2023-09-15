@@ -22,7 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import com.bank.app.infrastructure.token.TokenFilter;
+import com.bank.app.infrastructure.filter.Filter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,14 +30,14 @@ import com.bank.app.infrastructure.token.TokenFilter;
 public class Configurations {
 
     @Autowired
-    private TokenFilter tokenFilter;
+    private Filter filter;
 
     @Autowired
     @Value("${spring.mail.username}")
     private String username;
 
     @Autowired
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.password}")
     private String password;
 
     @Autowired
@@ -59,7 +59,7 @@ public class Configurations {
                         .requestMatchers(HttpMethod.POST, "email/v1/**").permitAll()
 
                         .anyRequest().authenticated())
-                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .cors(res -> res.configurationSource(req -> {
                     var cors = new CorsConfiguration();
                     cors.setAllowedOrigins(

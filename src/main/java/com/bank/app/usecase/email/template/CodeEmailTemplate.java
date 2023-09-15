@@ -1,4 +1,4 @@
-package com.bank.app.usecase.email;
+package com.bank.app.usecase.email.template;
 
 import org.springframework.stereotype.Service;
 

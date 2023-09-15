@@ -20,5 +20,9 @@ public interface ApproveService {
     List<ApproveCards> getAllCards();
     List<ApproveOfficial> getAllOfficial();
     List<ApproveAccount> getAllAccount();
+    List<ApproveBorrowing> getByBorrowing(String id);
+    List<ApproveCards> getByCards(String id);
+    List<ApproveOfficial> getByOfficial(String id);
+    List<ApproveAccount> getByAccount(String id);
 
 }

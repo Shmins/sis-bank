@@ -10,7 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ApproveAccount {
-
+    private String id;
+    
     private Account account;
 
     private Boolean isApproved;

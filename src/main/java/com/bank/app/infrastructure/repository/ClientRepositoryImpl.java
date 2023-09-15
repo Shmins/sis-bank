@@ -167,4 +167,9 @@ public class ClientRepositoryImpl implements ClientRepository {
         throw new UnsupportedOperationException("Unimplemented method 'findByIdAccount'");
     }
 
+    @Override
+    public Client findByAccount(String id) {
+        throw new UnsupportedOperationException("Unimplemented method 'findByAccount'");
+    }
+
 }

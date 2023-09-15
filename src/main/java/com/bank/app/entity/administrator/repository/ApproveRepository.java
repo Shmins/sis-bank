@@ -20,4 +20,12 @@ public interface ApproveRepository extends MongoRepository<Approve, String> {
     List<ApproveOfficial> findAllOfficial();
     @Query(value = "{'typeApproved': 'account', 'isApproved': false}" )
     List<ApproveAccount> findAllAccount();
+    @Query(value = "{'typeApproved': 'borrowing', 'borrowing.id': 0?}" )
+    List<ApproveBorrowing> findByBorrowing(String id);
+    @Query(value = "{'typeApproved': 'cards', 'cards.numberCard': 0?}" )
+    List<ApproveCards> findByCards(String id);
+    @Query(value = "{'typeApproved': 'official', 'official.cpf': 0?}" )
+    List<ApproveOfficial> findByOfficial(String id);
+    @Query(value = "{'typeApproved': 'account', 'account.id': 0?}" )
+    List<ApproveAccount> findByAccount(String id);
 }

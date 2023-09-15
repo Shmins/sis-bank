@@ -4,9 +4,8 @@ import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.NumberAgency;
+import com.bank.app.entity.client.model.cardmodel.Card;
 
 public interface ClientService {
     Client createClient(Client client);
@@ -19,5 +18,6 @@ public interface ClientService {
     List<Client> getClientByNameComplete(String nameComplete);
     Client getCardClient(String number);
     Client updateClient(Client client);
-    Account getByIdAccountAfterActive(String cpf, NumberAgency number);
+    Client findByAccount(String id);
+    Client addCardAccount(Card card, String id);
 }
