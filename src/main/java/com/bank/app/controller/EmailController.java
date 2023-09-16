@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.client.model.email.EmailCode;
 import com.bank.app.entity.client.repository.CodeEmailRepository;
-import com.bank.app.usecase.email.EmailAccountDto;
 import com.bank.app.usecase.email.EmailCodeDto;
 import com.bank.app.usecase.email.EmailService;
 
@@ -41,17 +40,6 @@ public class EmailController {
                  data);
             EmailCode result = this.codeEmailRepository.save(new EmailCode(data.code()));
             return new ResponseEntity<>(result.getId(), HttpStatus.valueOf(200));
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.valueOf(400));
-        }
-    }
-    @PostMapping(value = "/account/", produces = "application/json")
-    public ResponseEntity<?> sendEmailAccount(@RequestBody EmailAccountDto data ) {
-        try {
-            this.emailSend.sendEmailAccount(
-                 data);
-            return new ResponseEntity<>(HttpStatus.valueOf(200));
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(400));

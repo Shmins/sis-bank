@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +28,6 @@ import com.bank.app.entity.boss.model.Boss;
 
 @RestController
 @RequestMapping("boss/v1")
-@CrossOrigin("*")
-
 public class BossController {
     @Autowired
     private BossService bossService;
@@ -54,7 +51,7 @@ public class BossController {
         }
     }
    
-    
+    @RolesAllowed("BOSS")
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {

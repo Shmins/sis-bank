@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +27,6 @@ import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
-import com.bank.app.entity.official.model.Official;
 import com.bank.app.usecase.agency.AccountDto;
 import com.bank.app.usecase.approve.ApproveDto;
 
@@ -44,7 +42,6 @@ import jakarta.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("approve/v1")
-@CrossOrigin(origins = "*")
 public class ApproveController {
     @Autowired
     private ApproveService approveService;
@@ -163,14 +160,21 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/borrowing/{id}")
+    @PutMapping(value = "/borrowing/{decision}/{id}")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> approveBorrowing(@PathVariable("id") String id) {
+    public ResponseEntity<?> approveBorrowing(@PathVariable("decision") Boolean isApproved,
+            @PathVariable("id") String id) {
         try {
-            Borrowing borrowing = this.borrowingService.getBorrowingById(id);
-            borrowing.setIsAuthorized(true);
-            this.borrowingService.updateBorrowing(borrowing);
-            return new ResponseEntity<>(borrowing, HttpStatus.OK);
+            if (Boolean.TRUE.equals(isApproved)) {
+                Borrowing borrowing = this.borrowingService.getBorrowingById(id);
+                borrowing.setIsAuthorized(true);
+                this.borrowingService.updateBorrowing(borrowing);
+            } else {
+                Borrowing borrowing = this.borrowingService.getBorrowingById(id);
+                borrowing.setIsRefused(true);
+                this.borrowingService.updateBorrowing(borrowing);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (
 
@@ -180,21 +184,21 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/cards/{id}")
+    @PutMapping(value = "/cards/{decision}/{id}")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> approveCards(@PathVariable("id") String id) {
+    public ResponseEntity<?> approveCards(@PathVariable("decision") Boolean isApproved, @PathVariable("id") String id) {
         try {
+            if (Boolean.TRUE.equals(isApproved)) {
+                Client client = this.clientService.getCardClient(id);
+                Card card = client.getCards().stream().filter(res -> id.equals(res.getNumberCard())).toList().get(0);
+                List<Card> cards = client.getCards().stream().filter(res -> !id.equals(res.getNumberCard())).toList();
+                card.setActive(true);
 
-            Client client = this.clientService.getCardClient(id);
-            Card card = client.getCards().stream().filter(res -> id.equals(res.getNumberCard())).toList().get(0);
-            List<Card> cards = client.getCards().stream().filter(res -> !id.equals(res.getNumberCard())).toList();
-            card.setActive(true);
+                cards.add(card);
+                client.setCards(cards);
 
-            cards.add(card);
-            client.setCards(cards);
-
-            this.clientService.updateClient(client);
-
+                this.clientService.updateClient(client);
+            }
             return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (Exception e) {
@@ -203,19 +207,15 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/official/{id}")
+    @PutMapping(value = "/official/{decision}/{id}")
     @RolesAllowed("BOSS")
-    public ResponseEntity<?> approveOfficial(@PathVariable("id") String id) {
+    public ResponseEntity<?> approveOfficial(@PathVariable("decision") Boolean isApproved,
+            @PathVariable("id") String id) {
         try {
-            UserDetails user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-            var role = user.getAuthorities().stream().toList();
-            if (!role.get(0).getAuthority().equals("ROLE_BOSS")) {
-                throw new IllegalAccessError("Não autorizado");
+            if (Boolean.TRUE.equals(isApproved)) {
+                this.officialService.findByCpfAfterActive(id);
             }
-            Official official = this.officialService.findByCpfAfterActive(id);
-
-            return new ResponseEntity<>(official, HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -238,7 +238,6 @@ public class ApproveController {
                 this.clientService.updateClient(client);
                 this.approveService.deleteById(id);
 
-
                 emailService.sendEmailAccount(
                         new EmailAccountDto(
                                 client.getNameComplete(),
@@ -260,7 +259,7 @@ public class ApproveController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {

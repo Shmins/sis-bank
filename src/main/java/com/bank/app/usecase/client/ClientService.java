@@ -18,6 +18,6 @@ public interface ClientService {
     List<Client> getClientByNameComplete(String nameComplete);
     Client getCardClient(String number);
     Client updateClient(Client client);
-    Client findByAccount(String id);
+    Client getByIdAccount(String id);
     Client addCardAccount(Card card, String id);
 }

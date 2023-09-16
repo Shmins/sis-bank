@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +26,6 @@ import com.bank.app.usecase.borrowing.BorrowingTdo;
 
 @RestController
 @RequestMapping("borrowing/v1")
-@CrossOrigin(origins = "*")
 public class BorrowingController {
     @Autowired
     private BorrowingService borrowingService;
@@ -119,7 +117,7 @@ public class BorrowingController {
     public ResponseEntity<?> deleteBorrowingById(@PathVariable("id") String id) {
         try {
             this.borrowingService.deleteById(id);
-            return ResponseEntity.ok().build();
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }

@@ -65,6 +65,7 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
+
     @RolesAllowed("CLIENT")
     @PostMapping(value = "/approve/account", produces = "application/json")
     public ResponseEntity<?> approveAccount(@RequestBody AccountDto data) {
@@ -90,13 +91,13 @@ public class ClientController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-    
+
     @PostMapping(value = "/account/{cpf}", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
         try {
             Client client = this.clientService.getClientById(cpf);
-            if(client.getAccount().size() == client.getAccountLimit()){
+            if (client.getAccount().size() == client.getAccountLimit()) {
                 throw new IllegalArgumentException("Máximo de contas alcançado");
             }
             Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
@@ -150,16 +151,17 @@ public class ClientController {
 
         }
     }
+
     @PostMapping(value = "/account/cards/{id}", produces = "application/json")
     @RolesAllowed("CLIENT")
     public ResponseEntity<?> saveCardsAccount(@PathVariable("id") String id, @RequestBody Card data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-           
+
             List<Account> accounts = client.getAccount();
             Account account = accounts.stream().filter(res -> res.getId().equals(id)).toList().get(0);
-            List<Card> cards =  account.getCards();
-             if (cards.size() == 2) {
+            List<Card> cards = account.getCards();
+            if (cards.size() == 2) {
                 throw new GenericException("limite de cartões exedido");
             }
             for (Card i : cards) {
@@ -222,6 +224,18 @@ public class ClientController {
             clients.get(i).getAccount().forEach(accounts::add);
         }
         return new ResponseEntity<>(accounts, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/accounts/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
+    public ResponseEntity<?> getAccountById(@PathVariable String id) {
+        try {
+            Client client = this.clientService.getByIdAccount(id);
+            Account account = client.getAccount().stream().filter(res -> res.getId().equals(id)).toList().get(0);
+            return new ResponseEntity<>(account, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+        }
     }
 
     @GetMapping(value = "/cards/cpf/{cpf}")
@@ -319,7 +333,7 @@ public class ClientController {
             client.setEmail(data.getEmail() != null ? data.getEmail() : client.getEmail());
             client.setPhone(data.getPhone() != null ? data.getPhone() : client.getPhone());
             client.setAddress(data.getAddress() != null ? data.getAddress() : client.getAddress());
-            client.setAccountLimit(data.getAccountLimit() != null? data.getAccountLimit(): client.getAccountLimit());
+            client.setAccountLimit(data.getAccountLimit() != null ? data.getAccountLimit() : client.getAccountLimit());
             client.setUpdateAt(LocalDateTime.now());
 
             Client update = this.clientService.updateClient(client);
@@ -335,7 +349,7 @@ public class ClientController {
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.clientService.deleteById(id);
-            return ResponseEntity.ok().build();
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
@@ -349,7 +363,20 @@ public class ClientController {
             List<Card> card = client.getCards().stream().filter(res -> !number.equals(res.getNumberCard())).toList();
             client.setCards(card);
             this.clientService.updateClient(client);
-            return new ResponseEntity<>(card, HttpStatus.valueOf(200));
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+        }
+    }
+    @DeleteMapping(value = "/account/{number}")
+    @RolesAllowed("CLIENT")
+    public ResponseEntity<?> deleteAccountById(@PathVariable("number") String number) {
+        try {
+            Client client = this.clientService.getByIdAccount(number);
+            List<Account> account = client.getAccount().stream().filter(res -> !number.equals(res.getId())).toList();
+            client.setAccount(account);
+            this.clientService.updateClient(client);
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }

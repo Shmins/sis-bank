@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,17 +23,17 @@ import com.bank.app.entity.administrator.model.Administrator;
 import com.bank.app.usecase.administrator.AdministratorDto;
 import com.bank.app.usecase.administrator.AdministratorService;
 
+import jakarta.annotation.security.RolesAllowed;
 
-
+@Controller
 @RestController
 @RequestMapping("adm/v1")
-@CrossOrigin("*")
 public class AdministratorController {
     @Autowired
     private AdministratorService administratorService;
 
     @PostMapping(value = "/", produces = "application/json")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+    @RolesAllowed("BOSS")
     public ResponseEntity<?> saveAdministrator(@RequestBody AdministratorDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
@@ -43,8 +43,7 @@ public class AdministratorController {
                     data.getRg(),
                     data.getNameComplete(),
                     data.getPassword(),
-                    data.getBankAgency()
-                    );
+                    data.getBankAgency());
             Administrator result = this.administratorService.createAdministrator(adm);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -53,6 +52,8 @@ public class AdministratorController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
@@ -88,7 +89,7 @@ public class AdministratorController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
+    @RolesAllowed("BOSS")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.administratorService.deleteById(id);

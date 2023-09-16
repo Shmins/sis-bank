@@ -71,7 +71,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Client findByAccount(String id) {
+    public Client getByIdAccount(String id) {
         return this.clientRepository.findByAccount(id);
     }
 

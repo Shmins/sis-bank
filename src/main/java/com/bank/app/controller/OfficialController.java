@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,9 +27,9 @@ import jakarta.annotation.security.RolesAllowed;
 import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.official.model.Official;
 
+@Controller
 @RestController
 @RequestMapping("official/v1")
-@CrossOrigin("*")
 public class OfficialController {
     @Autowired
     private OfficialService officialService;
@@ -71,7 +71,7 @@ public class OfficialController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
-
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
@@ -84,6 +84,7 @@ public class OfficialController {
         }
     }
     @GetMapping(value = "/getAll")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> getById() {
         try {
             List<Official> official = this.officialService.getAll();
