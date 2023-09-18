@@ -36,8 +36,17 @@ public class BorrowingController {
     public ResponseEntity<?> postBorrowing(@RequestBody BorrowingTdo data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Borrowing borrowing = new Borrowing(client.getCpf(), data.getQuantity());
-            Borrowing result = this.borrowingService.createBorrowing(borrowing);
+
+            List<Borrowing> borrowings = this.borrowingService.getAllForClient(client.getCpf());
+            for(Borrowing i : borrowings){
+                if(Boolean.FALSE.equals(i.getIsAuthorized()) && Boolean.FALSE.equals(i.getIsRefused())){
+                    throw new IllegalArgumentException("Análise de empréstimo em progresso");
+                }
+            }
+            if(data.getQuantity() > client.getBorrowedLimit().getMaxLimit()){
+                    throw new IllegalArgumentException("Valor fora do limite do estabelecido");
+            }
+            Borrowing result = this.borrowingService.createBorrowing(new Borrowing(client.getCpf(), data.getQuantity()));
 
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {

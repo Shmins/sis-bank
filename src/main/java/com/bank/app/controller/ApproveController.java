@@ -24,6 +24,7 @@ import com.bank.app.entity.administrator.model.approve.ApproveBorrowing;
 import com.bank.app.entity.administrator.model.approve.ApproveCards;
 import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.client.model.Account;
+import com.bank.app.entity.client.model.BorrowedLimit;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
@@ -170,14 +171,19 @@ public class ApproveController {
             if (Boolean.TRUE.equals(isApproved)) {
                 Borrowing borrowing = approve.getBorrowing();
                 Client client = this.clientService.getClientById(borrowing.getCpf());
+                
                 borrowing.setIsAuthorized(true);
                 this.borrowingService.updateBorrowing(borrowing);
+
+                client.setBorrowedLimit(new BorrowedLimit(0, client.getBorrowedLimit().getMaxLimit() - borrowing.getQuantity()));
+                this.clientService.updateClient(client);
+
                 emailService.sendEmailAccount(
                         new EmailAccountDto(
                                 client.getNameComplete(),
                                 true,
                                 client.getEmail(),
-                                "Resultado do pedido de emprestimo",
+                                "Resultado do pedido de empréstimo",
                                 "borrowing"));
 
             } else {
@@ -190,7 +196,7 @@ public class ApproveController {
                                 client.getNameComplete(),
                                 false,
                                 client.getEmail(),
-                                "Resultado do pedido de emprestimo",
+                                "Resultado do pedido de empréstimo",
                                 "borrowing"));
 
             }
