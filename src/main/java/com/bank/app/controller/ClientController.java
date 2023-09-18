@@ -263,10 +263,10 @@ public class ClientController {
     }
     @GetMapping(value = "/cards/")
     @RolesAllowed("CLIENT")
-    public ResponseEntity<?> getByCardEntity(@PathVariable("number") String number) {
+    public ResponseEntity<?> getByCardEntity() {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            var card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard()));
+            var card = client.getCards();
             return new ResponseEntity<>(card, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
