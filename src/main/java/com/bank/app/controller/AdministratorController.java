@@ -53,8 +53,8 @@ public class AdministratorController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @GetMapping(value = "/cpf/{cpf}")
+    @RolesAllowed("BOSS")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
             Administrator clients = this.administratorService.getAdmById(cpf);

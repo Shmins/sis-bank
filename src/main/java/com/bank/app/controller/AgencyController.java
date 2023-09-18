@@ -51,8 +51,8 @@ public class AgencyController {
         }
     }
 
-    @GetMapping(value = "/")
-    public ResponseEntity<?> getAllEntity(@PathVariable("id") String id) {
+    @GetMapping(value = "/getAll")
+    public ResponseEntity<?> getAllEntity() {
         try {
             List<NumberAgency> clients = this.agencyService.getAll();
 

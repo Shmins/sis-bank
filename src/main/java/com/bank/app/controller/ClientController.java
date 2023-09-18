@@ -131,7 +131,7 @@ public class ClientController {
 
             client.setCards(cards);
             Client update = this.clientService.updateClient(client);
-            if (update != null && data.isActive()) {
+            if (update != null && Boolean.FALSE.equals(data.isActive())) {
                 this.approveService.createApprove(
                         new Approve(null,
                                 null,
@@ -255,6 +255,17 @@ public class ClientController {
     public ResponseEntity<?> getCardByNumberCard(@PathVariable("number") String number) {
         try {
             Client client = this.clientService.getCardClient(number);
+            var card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard()));
+            return new ResponseEntity<>(card, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+        }
+    }
+    @GetMapping(value = "/cards/")
+    @RolesAllowed("CLIENT")
+    public ResponseEntity<?> getByCardEntity(@PathVariable("number") String number) {
+        try {
+            Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             var card = client.getCards().stream().filter(res -> number.equals(res.getNumberCard()));
             return new ResponseEntity<>(card, HttpStatus.OK);
         } catch (Exception e) {

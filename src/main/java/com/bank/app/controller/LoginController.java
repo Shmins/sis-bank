@@ -43,28 +43,24 @@ public class LoginController {
                     token = this.tokenService
                             .token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
                     return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-
                 }
                 case ("ROLE_OFFICIAL"): {
                     var user = (Official) aut.getPrincipal();
                     token = this.tokenService
                             .token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
                     return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-
                 }
                 case ("ROLE_ADM"): {
                     var user = (Administrator) aut.getPrincipal();
                     token = this.tokenService
                             .token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
                     return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-
                 }
                 case ("ROLE_BOSS"): {
                     var user = (Boss) aut.getPrincipal();
                     token = this.tokenService
                             .token(new TokenUserTdo(user.getCpf(), user.getUsername(), user.getRole()));
                     return new ResponseEntity<>(token, HttpStatus.valueOf(200));
-
                 }
                 default:
                     return new ResponseEntity<>(HttpStatus.valueOf(401));

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.bank.app.usecase.email.EmailAccountDto;
 import com.bank.app.usecase.email.EmailCodeDto;
 import com.bank.app.usecase.email.EmailService;
-import com.bank.app.usecase.email.template.AccountEmailTemplate;
+import com.bank.app.usecase.email.template.NotifyEmailTemplate;
 import com.bank.app.usecase.email.template.CodeEmailTemplate;
 
 import jakarta.mail.MessagingException;
@@ -23,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private CodeEmailTemplate codeEmailTemplate;
     @Autowired 
-    private AccountEmailTemplate accountEmailTemplate;
+    private NotifyEmailTemplate accountEmailTemplate;
 
     @Override
     public void sendEmail(String to, String subject, EmailCodeDto data)
@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
             throws MessagingException, UnsupportedEncodingException {
 
 
-        String template = this.accountEmailTemplate.getTemplate(data.name(), data.isApproved());
+        String template = this.accountEmailTemplate.getTemplate(data.name(), data.isApproved(), data.typeSubject());
 
         MimeMessage messages = this.email.createMimeMessage();
 

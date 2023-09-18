@@ -27,6 +27,7 @@ import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
+import com.bank.app.entity.official.model.Official;
 import com.bank.app.usecase.agency.AccountDto;
 import com.bank.app.usecase.approve.ApproveDto;
 
@@ -165,14 +166,33 @@ public class ApproveController {
     public ResponseEntity<?> approveBorrowing(@PathVariable("decision") Boolean isApproved,
             @PathVariable("id") String id) {
         try {
+            Approve approve = this.approveService.getApproveById(id); 
             if (Boolean.TRUE.equals(isApproved)) {
-                Borrowing borrowing = this.borrowingService.getBorrowingById(id);
+                Borrowing borrowing = approve.getBorrowing();
+                Client client = this.clientService.getClientById(borrowing.getCpf());
                 borrowing.setIsAuthorized(true);
                 this.borrowingService.updateBorrowing(borrowing);
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                true,
+                                client.getEmail(),
+                                "Resultado do pedido de emprestimo",
+                                "borrowing"));
+
             } else {
-                Borrowing borrowing = this.borrowingService.getBorrowingById(id);
+                Borrowing borrowing = approve.getBorrowing();
                 borrowing.setIsRefused(true);
                 this.borrowingService.updateBorrowing(borrowing);
+                Client client = this.clientService.getClientById(borrowing.getCpf());
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                false,
+                                client.getEmail(),
+                                "Resultado do pedido de emprestimo",
+                                "borrowing"));
+
             }
             return new ResponseEntity<>(HttpStatus.OK);
 
@@ -188,8 +208,8 @@ public class ApproveController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> approveCards(@PathVariable("decision") Boolean isApproved, @PathVariable("id") String id) {
         try {
+            Client client = this.clientService.getCardClient(id);
             if (Boolean.TRUE.equals(isApproved)) {
-                Client client = this.clientService.getCardClient(id);
                 Card card = client.getCards().stream().filter(res -> id.equals(res.getNumberCard())).toList().get(0);
                 List<Card> cards = client.getCards().stream().filter(res -> !id.equals(res.getNumberCard())).toList();
                 card.setActive(true);
@@ -198,6 +218,21 @@ public class ApproveController {
                 client.setCards(cards);
 
                 this.clientService.updateClient(client);
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                true,
+                                client.getEmail(),
+                                "Resultado do pedido ativação do cartão",
+                                "card"));
+            } else {
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                client.getNameComplete(),
+                                false,
+                                client.getEmail(),
+                                "Resultado do pedido ativação do cartão",
+                                "card"));
             }
             return new ResponseEntity<>(HttpStatus.OK);
 
@@ -207,13 +242,30 @@ public class ApproveController {
         }
     }
 
-    @PutMapping(value = "/official/{decision}/{id}")
+    @PutMapping(value = "/official/{decision}/{cpf}")
     @RolesAllowed("BOSS")
     public ResponseEntity<?> approveOfficial(@PathVariable("decision") Boolean isApproved,
-            @PathVariable("id") String id) {
+            @PathVariable("cpf") String cpf) {
         try {
             if (Boolean.TRUE.equals(isApproved)) {
-                this.officialService.findByCpfAfterActive(id);
+                Official official = this.officialService.findByCpfAfterActive(cpf);
+
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                official.getNameComplete(),
+                                true,
+                                official.getEmail(),
+                                "Resultado do pedido de aprovação de função",
+                                "official"));
+            } else {
+                Official official = this.officialService.getOfficialById(cpf);
+                emailService.sendEmailAccount(
+                        new EmailAccountDto(
+                                official.getNameComplete(),
+                                false,
+                                official.getEmail(),
+                                "Resultado do pedido de aprovação de função",
+                                "official"));
             }
             return new ResponseEntity<>(HttpStatus.OK);
 
@@ -242,7 +294,9 @@ public class ApproveController {
                         new EmailAccountDto(
                                 client.getNameComplete(),
                                 true,
-                                client.getEmail(), "Resultado do pedido de abertura de conta"));
+                                client.getEmail(),
+                                "Resultado do pedido de abertura de conta",
+                                "account"));
             } else {
                 Approve approve = this.approveService.getApproveById(id);
                 Client client = this.clientService.getClientById(approve.getCpfCreatedReq());
@@ -250,7 +304,9 @@ public class ApproveController {
                         new EmailAccountDto(
                                 client.getNameComplete(),
                                 false,
-                                client.getEmail(), "Resultado do pedido de abertura de conta"));
+                                client.getEmail(),
+                                "Resultado do pedido de abertura de conta",
+                                "account"));
 
             }
             return new ResponseEntity<>(HttpStatus.OK);
@@ -259,6 +315,7 @@ public class ApproveController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
+
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {

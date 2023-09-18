@@ -2,6 +2,7 @@ package com.bank.app.entity.client.model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Getter;
@@ -11,7 +12,9 @@ import lombok.Setter;
 @Setter
 @Document(collection = "agency")
 public class NumberAgency {
-        
+    @Id
+    private String id;
+
     private String number;
 
     private String nameAgency;
