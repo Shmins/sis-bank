@@ -26,10 +26,10 @@ import com.bank.app.entity.administrator.model.approve.ApproveOfficial;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.BorrowedLimit;
 import com.bank.app.entity.client.model.Client;
+import com.bank.app.entity.client.model.NumberAgency;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
 import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.official.model.Official;
-import com.bank.app.usecase.agency.AccountDto;
 import com.bank.app.usecase.approve.ApproveDto;
 
 import com.bank.app.usecase.approve.ApproveService;
@@ -175,7 +175,7 @@ public class ApproveController {
                 borrowing.setIsAuthorized(true);
                 this.borrowingService.updateBorrowing(borrowing);
 
-                client.setBorrowedLimit(new BorrowedLimit(0, client.getBorrowedLimit().getMaxLimit() - borrowing.getQuantity()));
+                client.setBorrowedLimit(new BorrowedLimit(0, (client.getBorrowedLimit().getMaxLimit() - borrowing.getQuantity())));
                 this.clientService.updateClient(client);
 
                 emailService.sendEmailAccount(
@@ -284,13 +284,13 @@ public class ApproveController {
     @PutMapping(value = "/account/{decision}/{id}")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> approveAccount(@PathVariable("decision") Boolean decision,
-            @PathVariable("id") String id, @RequestBody AccountDto data) {
+            @PathVariable("id") String id, @RequestBody NumberAgency data) {
         try {
             if (Boolean.TRUE.equals(decision) && id != null) {
                 Approve approve = this.approveService.getApproveById(id);
                 Client client = this.clientService.getClientById(approve.getCpfCreatedReq());
                 List<Account> accounts = client.getAccount();
-                Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
+                Account account = new Account(approve.getAccount().getTypeAccount(), data, client.getCpf());
                 accounts.add(account);
                 client.setAccount(accounts);
                 this.clientService.updateClient(client);
