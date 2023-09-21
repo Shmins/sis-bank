@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bank.app.entity.administrator.model.Administrator;
 import com.bank.app.entity.boss.model.Boss;
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.Login;
 import com.bank.app.entity.official.model.Official;
+import com.bank.app.infrastructure.login.Login;
 import com.bank.app.infrastructure.token.TokenService;
 import com.bank.app.infrastructure.token.TokenUserTdo;
 

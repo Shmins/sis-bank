@@ -45,7 +45,7 @@ public class EmailController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(400));
         }
     }
-    @GetMapping(value = "code/{id}")
+    @GetMapping(value = "/code/{id}")
     public ResponseEntity<?> getCode(@PathVariable("id") String id) {
         try {
             Optional<EmailCode> code = this.codeEmailRepository.findById(id);
@@ -55,7 +55,7 @@ public class EmailController {
         }
 
     }
-    @DeleteMapping(value = "code/{id}")
+    @DeleteMapping(value = "/code/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
         try {
             this.codeEmailRepository.deleteById(id);

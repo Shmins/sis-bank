@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
+import com.bank.app.entity.administrator.model.approve.ApproveAccount;
 import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
@@ -86,7 +87,14 @@ public class ClientController {
                             false,
                             null,
                             null));
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            ApproveAccount approveAccount = new ApproveAccount(
+                    result.getId(),
+                    result.getAccount(),
+                    result.getIsApproved(),
+                    result.getIsRefused(),
+                    result.getCreatedAt(),
+                    result.getUpdateAt());
+            return new ResponseEntity<>(approveAccount, HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
@@ -105,8 +113,9 @@ public class ClientController {
             List<Account> ac = client.getAccount();
             ac.add(account);
             client.setAccount(ac);
-            Client result = this.clientService.updateClient(client);
-            return new ResponseEntity<>(result, HttpStatus.valueOf(200));
+
+            this.clientService.updateClient(client);
+            return new ResponseEntity<>(HttpStatus.valueOf(200));
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -271,6 +280,7 @@ public class ClientController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
+
     @GetMapping(value = "/cards/")
     @RolesAllowed("CLIENT")
     public ResponseEntity<?> getByCardEntity() {
@@ -297,7 +307,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/email/{email}")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getByEmail(@PathVariable("email") String email) {
         try {
             List<Client> clients = this.clientService.getClientByEmail(email);
@@ -308,7 +318,7 @@ public class ClientController {
         }
     }
 
-    @GetMapping(value = "/email/{nameComplete}")
+    @GetMapping(value = "/name/{nameComplete}")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getByNameComplete(@PathVariable("nameComplete") String nameComplete) {
         try {
@@ -365,11 +375,11 @@ public class ClientController {
         }
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "/{cpf}")
     @RolesAllowed("CLIENT")
-    public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteById(@PathVariable("cpf") String cpf) {
         try {
-            this.clientService.deleteById(id);
+            this.clientService.deleteById(cpf);
             return new ResponseEntity<>(HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
@@ -389,12 +399,13 @@ public class ClientController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
         }
     }
-    @DeleteMapping(value = "/account/{number}")
+
+    @DeleteMapping(value = "/account/{id}")
     @RolesAllowed("CLIENT")
-    public ResponseEntity<?> deleteAccountById(@PathVariable("number") String number) {
+    public ResponseEntity<?> deleteAccountById(@PathVariable("id") String id) {
         try {
-            Client client = this.clientService.getByIdAccount(number);
-            List<Account> account = client.getAccount().stream().filter(res -> !number.equals(res.getId())).toList();
+            Client client = this.clientService.getByIdAccount(id);
+            List<Account> account = client.getAccount().stream().filter(res -> !id.equals(res.getId())).toList();
             client.setAccount(account);
             this.clientService.updateClient(client);
             return new ResponseEntity<>(HttpStatus.valueOf(200));
