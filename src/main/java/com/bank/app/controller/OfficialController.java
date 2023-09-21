@@ -37,7 +37,7 @@ public class OfficialController {
     private ApproveService approveService;
 
     @RolesAllowed("BOSS")
-    @PostMapping(value = "", produces = "application/json")
+    @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
@@ -86,7 +86,7 @@ public class OfficialController {
     }
     @GetMapping(value = "/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> getById() {
+    public ResponseEntity<?> getAllOfficial() {
         try {
             List<Official> official = this.officialService.getAll();
 
@@ -96,11 +96,11 @@ public class OfficialController {
 
         }
     }
-    @PutMapping(value = "/{id}", produces = "application/json")
+    @PutMapping(value = "/{cpf}", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
-    public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody OfficialDto data) {
+    public ResponseEntity<?> updateByCpf(@PathVariable("cpf") String cpf, @RequestBody OfficialDto data) {
         try {
-            Official official = this.officialService.getOfficialById(id);
+            Official official = this.officialService.getOfficialById(cpf);
 
             official.setNameComplete(
                     data.getNameComplete() != null ? data.getNameComplete() : official.getNameComplete());
@@ -122,10 +122,10 @@ public class OfficialController {
     }
 
     @RolesAllowed("BOSS")
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
+    @DeleteMapping(value = "/{cpf}")
+    public ResponseEntity<?> deleteById(@PathVariable("id") String cpf) {
         try {
-            this.officialService.deleteById(id);
+            this.officialService.deleteById(cpf);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

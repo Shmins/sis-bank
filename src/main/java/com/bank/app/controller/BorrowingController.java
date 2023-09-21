@@ -56,8 +56,10 @@ public class BorrowingController {
     @PostMapping(value = "/approve/{id}", produces = "application/json")
     public ResponseEntity<?> sendToApprove(@PathVariable("id") String id) {
         try {
-            Borrowing result = this.borrowingService.getBorrowingById(id);
-            Approve borrowingApprove = new Approve(null, result, id, null, null, null, "borrowing", false, false, LocalDateTime.now(), LocalDateTime.now());
+            Borrowing borrowing = this.borrowingService.getBorrowingById(id);
+            borrowing.setIsSendToApprove(true);
+            Approve borrowingApprove = new Approve(null, borrowing, id, null, null, null, "borrowing", false, false, LocalDateTime.now(), LocalDateTime.now());
+            
             Approve approve = this.approveService.createApprove(borrowingApprove);
 
 

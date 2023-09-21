@@ -73,7 +73,7 @@ public class ClientController {
         try {
 
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
+            Account account = new Account(data.getTypeAccount(), null, client.getCpf());
 
             Approve result = this.approveService.createApprove(
                     new Approve(null,

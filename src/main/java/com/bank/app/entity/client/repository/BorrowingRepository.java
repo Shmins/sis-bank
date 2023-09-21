@@ -12,4 +12,6 @@ import com.bank.app.entity.client.model.borrowing.Borrowing;
 public interface BorrowingRepository extends MongoRepository<Borrowing, String> {
     @Query(value = "{cpf: ?0}")
     List<Borrowing> findAllByCpf(String cpf);
+    @Query(value = "{'isSendToApprove': false}")
+    List<Borrowing> findAll();
 }

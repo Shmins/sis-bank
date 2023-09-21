@@ -18,6 +18,7 @@ public class Borrowing {
     private String id;
     private String cpf; // Cpf of the user who requested the loan
     private int quantity; // Quantity -> 30000 = R$ 300,00
+    private Boolean isSendToApprove = false;
     private Boolean isAuthorized = false;
     private Boolean isRefused = false;
     private LocalDateTime createdAt;
