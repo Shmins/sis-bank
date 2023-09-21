@@ -61,7 +61,8 @@ public class BorrowingController {
             Approve borrowingApprove = new Approve(null, borrowing, id, null, null, null, "borrowing", false, false, LocalDateTime.now(), LocalDateTime.now());
             
             Approve approve = this.approveService.createApprove(borrowingApprove);
-
+            
+            this.borrowingService.updateBorrowing(borrowing);
 
             return new ResponseEntity<>(approve, HttpStatus.valueOf(200));
         } catch (Exception e) {
