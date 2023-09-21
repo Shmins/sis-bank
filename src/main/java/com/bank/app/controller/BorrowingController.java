@@ -57,7 +57,7 @@ public class BorrowingController {
     public ResponseEntity<?> sendToApprove(@PathVariable("id") String id) {
         try {
             Borrowing result = this.borrowingService.getBorrowingById(id);
-            Approve borrowingApprove = new Approve(null, result, id, null, null, null, "borrowing", false, LocalDateTime.now(), LocalDateTime.now());
+            Approve borrowingApprove = new Approve(null, result, id, null, null, null, "borrowing", false, false, LocalDateTime.now(), LocalDateTime.now());
             Approve approve = this.approveService.createApprove(borrowingApprove);
 
 

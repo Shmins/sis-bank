@@ -10,7 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ApproveCards {
-
+    private String id;
+    
     private Card card;
 
     private Boolean isApproved;

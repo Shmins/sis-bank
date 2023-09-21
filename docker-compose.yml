@@ -1,26 +1,19 @@
 version: '1.0'
+
 services:
-  springboot:
+  api_service:
     build: .
-    environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/db_star_wars
-    container_name: sis-bank
+    restart: always
     ports:
       - 8080:8080
-    depends_on:
-      - mongo
     links:
-      - mongo
-    networks:
-      - spring-mongo-net
-mongo:
+      - mongo:sis-bank-mongo-1
+ 
+  mongo:
     image: mongo
-    container_name: sis-bank-mongodb
-    ports:
-      - 27017:27017
-    command: mongod --smallfiles --logpath=/dev/null # --quiet
-    networks:
-      - spring-mongo-net
-networks:
-  spring-mongo-net:
-    driver: bridge
+    command: mongod --auth
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: sisbank
+        MONGO_INITDB_ROOT_PASSWORD: sisbank123
+    volumes:
+        - /home/renatogroffe/Desenvolvimento/Docker/Volumes/MongoDB:/data/db

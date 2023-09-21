@@ -34,6 +34,8 @@ public class Approve {
     private String typeApproved; // Type approved: Card, Official, borrowing, Account 
 
     private Boolean isApproved = false;
+    
+    private Boolean isRefused = false;
 
     private LocalDateTime createdAt;
 

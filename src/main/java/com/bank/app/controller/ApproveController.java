@@ -69,6 +69,7 @@ public class ApproveController {
                     data.getDescription(),
                     data.getTypeApproved(),
                     false,
+                    false,
                     LocalDateTime.now(),
                     LocalDateTime.now());
             Approve result = this.approveService.createApprove(approve);
@@ -167,15 +168,16 @@ public class ApproveController {
     public ResponseEntity<?> approveBorrowing(@PathVariable("decision") Boolean isApproved,
             @PathVariable("id") String id) {
         try {
-            Approve approve = this.approveService.getApproveById(id); 
+            Approve approve = this.approveService.getApproveById(id);
             if (Boolean.TRUE.equals(isApproved)) {
                 Borrowing borrowing = approve.getBorrowing();
                 Client client = this.clientService.getClientById(borrowing.getCpf());
-                
+
                 borrowing.setIsAuthorized(true);
                 this.borrowingService.updateBorrowing(borrowing);
 
-                client.setBorrowedLimit(new BorrowedLimit(0, (client.getBorrowedLimit().getMaxLimit() - borrowing.getQuantity())));
+                client.setBorrowedLimit(
+                        new BorrowedLimit(0, (client.getBorrowedLimit().getMaxLimit() - borrowing.getQuantity())));
                 this.clientService.updateClient(client);
 
                 emailService.sendEmailAccount(
@@ -185,6 +187,9 @@ public class ApproveController {
                                 client.getEmail(),
                                 "Resultado do pedido de empréstimo",
                                 "borrowing"));
+                                
+                approve.setIsApproved(true);
+                this.approveService.updateApprove(approve);
 
             } else {
                 Borrowing borrowing = approve.getBorrowing();
@@ -198,6 +203,8 @@ public class ApproveController {
                                 client.getEmail(),
                                 "Resultado do pedido de empréstimo",
                                 "borrowing"));
+                approve.setIsRefused(true);
+                this.approveService.updateApprove(approve);
 
             }
             return new ResponseEntity<>(HttpStatus.OK);
@@ -214,14 +221,14 @@ public class ApproveController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> approveCards(@PathVariable("decision") Boolean isApproved, @PathVariable("id") String id) {
         try {
-            Client client = this.clientService.getCardClient(id);
+            Approve approve = approveService.getApproveById(id);
+            Client client = this.clientService.getCardClient(approve.getCard().getNumberCard());
             if (Boolean.TRUE.equals(isApproved)) {
-                Card card = client.getCards().stream().filter(res -> id.equals(res.getNumberCard())).toList().get(0);
-                List<Card> cards = client.getCards().stream().filter(res -> !id.equals(res.getNumberCard())).toList();
-                card.setActive(true);
-
-                cards.add(card);
-                client.setCards(cards);
+                for (Card card : client.getCards()) {
+                    if (card.getNumberCard().equals(id)) {
+                        card.setActive(true);
+                    }
+                }
 
                 this.clientService.updateClient(client);
                 emailService.sendEmailAccount(
@@ -229,18 +236,25 @@ public class ApproveController {
                                 client.getNameComplete(),
                                 true,
                                 client.getEmail(),
-                                "Resultado do pedido ativação do cartão",
+                                "Resultado do pedido de ativação do cartão",
                                 "card"));
+
+                approve.setIsApproved(true);
+                this.approveService.updateApprove(approve);
+
             } else {
                 emailService.sendEmailAccount(
                         new EmailAccountDto(
                                 client.getNameComplete(),
                                 false,
                                 client.getEmail(),
-                                "Resultado do pedido ativação do cartão",
+                                "Resultado do pedido de ativação do cartão",
                                 "card"));
+                approve.setIsRefused(true);
+                this.approveService.updateApprove(approve);
             }
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            return new ResponseEntity<>(client, HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

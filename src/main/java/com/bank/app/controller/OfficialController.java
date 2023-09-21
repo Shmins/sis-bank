@@ -61,6 +61,7 @@ public class OfficialController {
                             result.getEmail(),
                             "official",
                             false,
+                            false,
                             null,
                             null));
             }

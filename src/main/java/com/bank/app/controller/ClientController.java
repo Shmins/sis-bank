@@ -83,6 +83,7 @@ public class ClientController {
                             null,
                             "account",
                             false,
+                            false,
                             null,
                             null));
             return new ResponseEntity<>(result, HttpStatus.OK);
@@ -141,6 +142,7 @@ public class ClientController {
                                 null,
                                 "cards",
                                 false,
+                                false,
                                 null,
                                 null));
             }
@@ -186,6 +188,7 @@ public class ClientController {
                                 null,
                                 "cards",
                                 false,
+                                false,
                                 null,
                                 null));
             }
@@ -202,6 +205,13 @@ public class ClientController {
     public ResponseEntity<?> getAll() {
         List<Client> clients = this.clientService.getAll();
         return new ResponseEntity<>(clients, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/")
+    @RolesAllowed("CLIENT")
+    public ResponseEntity<?> getByEntityClient() {
+        Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new ResponseEntity<>(client, HttpStatus.OK);
     }
 
     @GetMapping(value = "/cards/getAll")
