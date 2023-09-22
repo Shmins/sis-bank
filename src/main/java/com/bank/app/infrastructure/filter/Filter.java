@@ -53,13 +53,8 @@ public class Filter extends OncePerRequestFilter {
         }
         case ("ROLE_OFFICIAL"): {
           UserDetails user = this.officialRepository.getOfficialByCpf(subject);
-
-          if (user.isEnabled()) {
-            var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-          } else {
-            throw new IllegalAccessError("Funcionário não autorizado");
-          }
+          var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+          SecurityContextHolder.getContext().setAuthentication(auth);
           break;
         }
         case ("ROLE_ADM"): {

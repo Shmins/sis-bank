@@ -56,7 +56,7 @@ public class EmailController {
 
     }
     @DeleteMapping(value = "/code/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteCodeById(@PathVariable("id") String id) {
         try {
             this.codeEmailRepository.deleteById(id);
             return ResponseEntity.ok().build();

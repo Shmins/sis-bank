@@ -2,3 +2,5 @@ spring.data.mongodb.host = sis-bank-mongo-1
 spring.data.mongodb.port = 27017
 spring.data.mongodb.database = sis-bank
 spring.data.mongodb.uri=mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+
+docker run -p 8080:8080 --link sis-bank-mongo-1 --name sis-bank-api sis-bank-api_service 

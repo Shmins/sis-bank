@@ -33,7 +33,7 @@ public class BorrowingController {
     private ApproveService approveService;
 
     @PostMapping(value = "/", produces = "application/json")
-    public ResponseEntity<?> postBorrowing(@RequestBody BorrowingTdo data) {
+    public ResponseEntity<?> saveBorrowing(@RequestBody BorrowingTdo data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -54,6 +54,7 @@ public class BorrowingController {
         }
     }
     @PostMapping(value = "/approve/{id}", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> sendToApprove(@PathVariable("id") String id) {
         try {
             Borrowing borrowing = this.borrowingService.getBorrowingById(id);
@@ -92,10 +93,11 @@ public class BorrowingController {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }
     }
-    @GetMapping(value = "/cpf/{cpf}")
-    public ResponseEntity<?> getBorrowing(@PathVariable("cpf") String cpf) {
+    @GetMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
+    public ResponseEntity<?> getBorrowing(@PathVariable("id") String id) {
         try {
-            Borrowing result = this.borrowingService.getBorrowingById(cpf);
+            Borrowing result = this.borrowingService.getBorrowingById(id);
             return new ResponseEntity<>(result, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
@@ -103,12 +105,11 @@ public class BorrowingController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    @PutMapping(value = "/{cpf}", produces = "application/json")
-    public ResponseEntity<?> updateBorrowingById(@PathVariable("cpf") String id, @RequestBody BorrowingTdo data) {
+    @PutMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<?> updateBorrowingById(@PathVariable("id") String id, @RequestBody BorrowingTdo data) {
         try {
             Borrowing borrowing = this.borrowingService.getBorrowingById(id);
 
-            borrowing.setCpf(data.getCpf() != null ? data.getCpf() : borrowing.getCpf());
             borrowing.setQuantity(
                     data.getQuantity() != borrowing.getQuantity() ? data.getQuantity() : borrowing.getQuantity());
             borrowing.setIsAuthorized(

@@ -31,18 +31,17 @@ import com.bank.app.entity.boss.model.Boss;
 public class BossController {
     @Autowired
     private BossService bossService;
-
     @RolesAllowed("BOSS")
     @PostMapping(value = "/", produces = "application/json")
-    public ResponseEntity<?> saveOfficial(@RequestBody BossDto data) {
+    public ResponseEntity<?> saveBoss(@RequestBody BossDto data) {
         try {
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
             data.setPassword(code);
-            Boss official = new Boss(
+            Boss boss = new Boss(
                     data.getCpf(),
                     data.getNameComplete(),
                     data.getPassword());
-            Boss result = this.bossService.createBoss(official);
+            Boss result = this.bossService.createBoss(boss);
 
             return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -52,8 +51,8 @@ public class BossController {
     }
    
     @RolesAllowed("BOSS")
-    @GetMapping(value = "/cpf/{cpf}")
-    public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
+    @GetMapping(value = "/{cpf}")
+    public ResponseEntity<?> getBossById(@PathVariable("cpf") String cpf) {
         try {
             Boss boss = this.bossService.getBossById(cpf);
 
@@ -64,10 +63,10 @@ public class BossController {
         }
     }
     @RolesAllowed("BOSS")
-    @PutMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<?> updateById(@PathVariable("id") String id, @RequestBody BossDto data) {
+    @PutMapping(value = "/{cpf}", produces = "application/json")
+    public ResponseEntity<?> updateBossById(@PathVariable("cpf") String cpf, @RequestBody BossDto data) {
         try {
-            Boss boss = this.bossService.getBossById(id);
+            Boss boss = this.bossService.getBossById(cpf);
 
             boss.setNameComplete(
                     data.getNameComplete() != null ? data.getNameComplete() : boss.getNameComplete());
@@ -86,7 +85,7 @@ public class BossController {
 
     @RolesAllowed("BOSS")
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteBossById(@PathVariable("id") String id) {
         try {
             this.bossService.deleteById(id);
             return ResponseEntity.ok().build();
