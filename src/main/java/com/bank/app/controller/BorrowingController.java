@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +17,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.borrowing.Borrowing;
-import com.bank.app.usecase.approve.ApproveService;
+
 import com.bank.app.usecase.borrowing.BorrowingService;
 import com.bank.app.usecase.borrowing.BorrowingTdo;
 
@@ -30,7 +32,8 @@ public class BorrowingController {
     @Autowired
     private BorrowingService borrowingService;
     @Autowired
-    private ApproveService approveService;
+    @Value("${java.hostusers}")
+    private String host;
 
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveBorrowing(@RequestBody BorrowingTdo data) {
@@ -57,15 +60,16 @@ public class BorrowingController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> sendToApprove(@PathVariable("id") String id) {
         try {
+            RestTemplate restTemplate = new RestTemplate();
             Borrowing borrowing = this.borrowingService.getBorrowingById(id);
             borrowing.setIsSendToApprove(true);
             Approve borrowingApprove = new Approve(null, borrowing, id, null, null, null, "borrowing", false, false, LocalDateTime.now(), LocalDateTime.now());
             
-            Approve approve = this.approveService.createApprove(borrowingApprove);
+            restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), borrowingApprove);
             
             this.borrowingService.updateBorrowing(borrowing);
 
-            return new ResponseEntity<>(approve, HttpStatus.valueOf(200));
+            return new ResponseEntity<>(borrowing, HttpStatus.valueOf(200));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.valueOf(500));
         }

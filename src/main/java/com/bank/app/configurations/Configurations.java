@@ -63,7 +63,7 @@ public class Configurations {
                 .cors(res -> res.configurationSource(req -> {
                     var cors = new CorsConfiguration();
                     cors.setAllowedOrigins(
-                            List.of("http://localhost:3000"));
+                            List.of("http://10.14.10.189:3000", "http://localhost:3000", "http://localhost:8081"));
                     cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                     cors.setAllowedHeaders(List.of("*"));
                     return cors;
@@ -96,7 +96,7 @@ public class Configurations {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
-
+        
         return mailSender;
     }
 }

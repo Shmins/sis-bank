@@ -43,7 +43,7 @@ public class Filter extends OncePerRequestFilter {
       token = authorization.replace("Bearer", "");
       var subject = this.tokenService.getSubject(token);
       var role = this.tokenService.getIssuer(token);
-
+      
       switch (role) {
         case ("ROLE_CLIENT"): {
           var user = this.clientRepository.getClientByCpf(subject);

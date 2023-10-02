@@ -1,0 +1,26 @@
+spring:
+    application:
+        name: sis-bank-api_service
+    data:
+        mongodb:
+            host: sis-bank-mongo-1
+            port: 27017
+            database: sis-bank
+            uri: mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+    security:
+        user: 
+            name: user
+            password: user
+    datasource:
+        secret: ${API_SECRET:shar2122}
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: shmins.156@gmail.com
+        password: hrxftjfbexelzeye
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true

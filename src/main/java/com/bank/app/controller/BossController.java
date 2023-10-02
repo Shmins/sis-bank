@@ -19,7 +19,7 @@ import com.bank.app.usecase.boss.BossDto;
 
 import com.bank.app.usecase.boss.BossService;
 
-
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -56,6 +56,17 @@ public class BossController {
         try {
             Boss boss = this.bossService.getBossById(cpf);
 
+            return new ResponseEntity<>(boss, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
+
+        }
+    }
+    @RolesAllowed("BOSS")
+    @GetMapping(value = "/")
+    public ResponseEntity<?> getByLogin() {
+        try {
+            Boss boss = (Boss) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return new ResponseEntity<>(boss, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

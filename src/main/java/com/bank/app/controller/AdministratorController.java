@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.app.entity.administrator.model.Administrator;
-
 import com.bank.app.usecase.administrator.AdministratorDto;
 import com.bank.app.usecase.administrator.AdministratorService;
 
@@ -52,7 +51,17 @@ public class AdministratorController {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
+    @RolesAllowed("ADM")
+    @GetMapping(value = "/")
+    public ResponseEntity<?> getByLogin() {
+        try {
+            Administrator adm = (Administrator) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return new ResponseEntity<>(adm, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
 
+        }
+    }
     @GetMapping(value = "/cpf/{cpf}")
     @RolesAllowed("BOSS")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {

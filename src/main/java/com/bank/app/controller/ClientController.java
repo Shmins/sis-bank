@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,9 +20,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.bank.app.entity.administrator.model.approve.Approve;
-import com.bank.app.entity.administrator.model.approve.ApproveAccount;
 import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.Account;
 import com.bank.app.entity.client.model.Client;
@@ -29,7 +30,7 @@ import com.bank.app.entity.client.model.Client;
 import com.bank.app.entity.client.model.cardmodel.Card;
 
 import com.bank.app.usecase.agency.AccountDto;
-import com.bank.app.usecase.approve.ApproveService;
+
 import com.bank.app.usecase.client.CardDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
@@ -42,9 +43,11 @@ import jakarta.annotation.security.RolesAllowed;
 public class ClientController {
     @Autowired
     private ClientService clientService;
-    @Autowired
-    private ApproveService approveService;
 
+    @Autowired
+    @Value("${java.hostusers}")
+    private String host;
+    
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto data) {
         try {
@@ -71,12 +74,11 @@ public class ClientController {
     @PostMapping(value = "/approve/account", produces = "application/json")
     public ResponseEntity<?> approveAccount(@RequestBody AccountDto data) {
         try {
-
+            RestTemplate restTemplate = new RestTemplate();
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Account account = new Account(data.getTypeAccount(), null, client.getCpf());
 
-            Approve result = this.approveService.createApprove(
-                    new Approve(null,
+            Approve result = new Approve(null,
                             null,
                             client.getCpf(),
                             account,
@@ -86,15 +88,9 @@ public class ClientController {
                             false,
                             false,
                             null,
-                            null));
-            ApproveAccount approveAccount = new ApproveAccount(
-                    result.getId(),
-                    result.getAccount(),
-                    result.getIsApproved(),
-                    result.getIsRefused(),
-                    result.getCreatedAt(),
-                    result.getUpdateAt());
-            return new ResponseEntity<>(approveAccount, HttpStatus.OK);
+                            null);
+            restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), result);
+            return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
@@ -127,6 +123,7 @@ public class ClientController {
     @RolesAllowed("CLIENT")
     public ResponseEntity<?> saveCards(@RequestBody Card data) {
         try {
+            RestTemplate restTemplate = new RestTemplate();
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (client.getCards().size() == 6) {
                 throw new GenericException("limite de cartões exedido");
@@ -142,8 +139,7 @@ public class ClientController {
             client.setCards(cards);
             Client update = this.clientService.updateClient(client);
             if (update != null && Boolean.FALSE.equals(data.isActive())) {
-                this.approveService.createApprove(
-                        new Approve(null,
+                Approve approve = new Approve(null,
                                 null,
                                 client.getCpf(),
                                 null,
@@ -153,7 +149,8 @@ public class ClientController {
                                 false,
                                 false,
                                 null,
-                                null));
+                                null);
+            restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
             }
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
 
@@ -168,6 +165,7 @@ public class ClientController {
     public ResponseEntity<?> saveCardsAccount(@PathVariable("id") String id, @RequestBody Card data) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            RestTemplate restTemplate = new RestTemplate();
 
             List<Account> accounts = client.getAccount();
             Account account = accounts.stream().filter(res -> res.getId().equals(id)).toList().get(0);
@@ -188,18 +186,19 @@ public class ClientController {
             client.setAccount(accounts);
             Client update = this.clientService.updateClient(client);
             if (update != null && data.isActive()) {
-                this.approveService.createApprove(
-                        new Approve(null,
-                                null,
-                                client.getCpf(),
-                                null,
-                                data,
-                                null,
-                                "cards",
-                                false,
-                                false,
-                                null,
-                                null));
+                Approve approve = new Approve(null,
+                        null,
+                        client.getCpf(),
+                        null,
+                        data,
+                        null,
+                        "cards",
+                        false,
+                        false,
+                        null,
+                        null);
+                restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
+               
             }
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
 

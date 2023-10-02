@@ -4,3 +4,52 @@ spring.data.mongodb.database = sis-bank
 spring.data.mongodb.uri=mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
 
 docker run -p 8080:8080 --link sis-bank-mongo-1 --name sis-bank-api sis-bank-api_service 
+
+spring.data.mongodb.host = sis-bank-mongo-1
+spring.data.mongodb.port = 27017
+spring.data.mongodb.database = sis-bank
+spring.data.mongodb.uri=mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+
+spring.security.user.name= user
+spring.security.user.password= user
+spring.datasource.secret = ${API_SECRET:shar2122}
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username= shmins.156@gmail.com
+spring.mail.password= hrxftjfbexelzeye
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+spring.devtools.remote.secret=Secret@12300
+
+
+server:
+    port: 8080
+
+spring:
+    application:
+        name: sis-bank-api_service
+    data:
+        mongodb:
+            host: sis-bank-mongo-1
+            port: 27017
+            database: sis-bank
+            uri: mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+    security:
+        user: 
+            name: user
+            password: user
+    datasource:
+        secret: ${API_SECRET:shar2122}
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: shmins.156@gmail.com
+        password: hrxftjfbexelzeye
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true

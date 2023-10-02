@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
-import com.bank.app.usecase.approve.ApproveService;
 import com.bank.app.usecase.official.OfficialDto;
 import com.bank.app.usecase.official.OfficialService;
 
@@ -34,12 +35,14 @@ public class OfficialController {
     @Autowired
     private OfficialService officialService;
     @Autowired
-    private ApproveService approveService;
+    @Value("${java.hostusers}")
+    private String host;
 
     @RolesAllowed("BOSS")
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data) {
         try {
+            RestTemplate restTemplate = new RestTemplate();
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
             data.setPassword(code);
             Official official = new Official(
@@ -52,8 +55,7 @@ public class OfficialController {
             Official result = this.officialService.createOfficial(official);
 
             if(result != null && result.getIsAuthorized()){
-                 this.approveService.createApprove(
-                    new Approve(null,
+                 Approve approve = new Approve(null,
                             null,
                             result.getCpf(),
                             null,
@@ -63,7 +65,8 @@ public class OfficialController {
                             false,
                             false,
                             null,
-                            null));
+                            null);
+                restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
             }
 
             return new ResponseEntity<>(result, HttpStatus.OK);
