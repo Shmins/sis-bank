@@ -138,12 +138,12 @@ public class AdministratorRepositoryImpl implements AdministratorRepository {
     }
 
     @Override
-    public List<Administrator> findByRg(String rg) {
+    public Administrator findByRg(String rg) {
         throw new UnsupportedOperationException("Unimplemented method 'findByRg'");
     }
 
     @Override
-    public List<Administrator> findByNameComplete(String nameComplete) {
+    public Administrator findByNameComplete(String nameComplete) {
         throw new UnsupportedOperationException("Unimplemented method 'findByNameComplete'");
     }
     

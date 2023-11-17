@@ -1,12 +1,14 @@
 spring:
     application:
-        name: sis-bank-api_service
+        name: sis-bank-users
+    config:
+        activate:
+          on-profile:
+          - dev
     data:
         mongodb:
-            host: sis-bank-mongo-1
-            port: 27017
             database: sis-bank
-            uri: mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+            uri: mongodb://sisbank:sisbank123@swiftpay-mongo-1:27017
     security:
         user: 
             name: user
@@ -24,3 +26,10 @@ spring:
                     auth: true
                     starttls:
                         enable: true
+eureka:
+    client:
+        service-url:
+            defaultZone:
+                http://localhost:8761/eureka
+server:
+    port: 8082

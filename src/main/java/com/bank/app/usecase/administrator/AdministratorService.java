@@ -13,7 +13,7 @@ public interface AdministratorService {
     Administrator getAdmById(String cpf);
     UserDetails getAdmByCpf(String cpf);
     List<Administrator> getAll();
-    List<Administrator> getAdmByRg(String rg);
-    List<Administrator> getAdmByNameComplete(String nameComplete);
+    Administrator getAdmByRg(String rg);
+    Administrator getAdmByNameComplete(String nameComplete);
     Administrator updateAdministrator(Administrator adm);
 }

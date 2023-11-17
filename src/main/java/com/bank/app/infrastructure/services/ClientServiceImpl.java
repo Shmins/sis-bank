@@ -51,12 +51,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public List<Client> getClientByEmail(String email) {
-        return this.clientRepository.findByEmail(email);
-    }
-
-    @Override
-    public List<Client> getClientByNameComplete(String nameComplete) {
+    public Client getClientByNameComplete(String nameComplete) {
         return this.clientRepository.findByNameComplete(nameComplete);
     }
 

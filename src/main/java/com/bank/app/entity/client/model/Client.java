@@ -5,33 +5,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import com.bank.app.entity.client.exception.CpfException;
 import com.bank.app.entity.client.model.cardmodel.Card;
-import lombok.Data;
+import com.bank.app.entity.user.User;
 
-@Data
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "client")
-public class Client implements UserDetails {
-    @Id
-    private String cpf;
-
-    private String nameComplete;
+public class Client extends User {
 
     private String email;
-
-    private String password;
 
     private Phone phone;
 
     private Address address;
-
-    private BorrowedLimit borrowedLimit;
 
     private Integer accountLimit;
     
@@ -39,45 +34,28 @@ public class Client implements UserDetails {
 
     private List<Account> account = new ArrayList<>();
 
-    private String role;
-    
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
-
-    public Client(String cpf, String nameComplete, String email, String password, List<Account> account, Phone phone,
+    public Client(String cpf, String nameComplete, String email, String password, List<Card> card, List<Account> account, Phone phone,
             Address address) {
-        if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
-            throw new CpfException("Formato do cpf inválido");
+        super(cpf, password, nameComplete, "ROLE_CLIENT", LocalDateTime.now(),LocalDateTime.now());
+        if(Boolean.FALSE.equals(super.verifyCpfCode(cpf))){
+            throw new IllegalArgumentException("Cpf com formato errado");
         }
-        
-        this.cpf = cpf;
-        this.nameComplete = nameComplete;
+        this.cards = card;
         this.email = email;
-        this.password = password;
         this.account = account;
         this.phone = phone;
         this.address = address;
         this.accountLimit = 3;
-        this.role = "ROLE_CLIENT";
-        this.createAt = LocalDateTime.now();
-        this.updateAt = LocalDateTime.now();
-        this.borrowedLimit = new BorrowedLimit(0, 100000);
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role));
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
+        return List.of(new SimpleGrantedAuthority(super.getRole()));
     }
 
     @Override
     public String getUsername() {
-        return cpf;
+        return super.getCpf();
     }
 
     @Override
@@ -99,4 +77,5 @@ public class Client implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

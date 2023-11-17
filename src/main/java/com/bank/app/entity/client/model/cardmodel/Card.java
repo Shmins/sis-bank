@@ -5,12 +5,18 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
+import com.bank.app.usecase.client.CardDto;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class Card {
 
@@ -20,7 +26,7 @@ public class Card {
     @Indexed(unique = true)
     private int cvc;
  
-    private TypeCard typeCard;
+    private String typeCard;
 
     private String nameComplete;
 
@@ -28,19 +34,25 @@ public class Card {
 
     private String validityDate;
 
-    private boolean isActive;
+    private boolean isAuthorized;
 
     private LocalDateTime createAt;
 
     private LocalDateTime updateAt;
 
-    public Card(String numberCard, int cvc, TypeCard typeCard, String nameComplete, String typeIssuer,
-            String validityDate, Boolean isActive){
+    public Card(String numberCard, int cvc, String typeCard, String nameComplete, String typeIssuer,
+            String validityDate, Boolean isAuthorized){
         if (cvc <= 100) {
             throw new IllegalArgumentException("CVC com formato errado");
         }
         if (!numberCard.matches("\\d{4}\\ \\d{4}\\ \\d{4}\\ \\d{4}")) {
             throw new IllegalArgumentException("Número de cartão inválido");
+        }
+        if(typeCard == null){
+            throw new IllegalArgumentException("Tipo de cartão vazio");
+        }
+        if(!typeCard.equals("credit") && !typeCard.equals("debit") && !typeCard.equals("savings") && !typeCard.equals("credit_debit")&& !typeCard.equals("savings_debit")){
+            throw new IllegalArgumentException("Tipo de cartão inválido");
         }
         this.nameComplete = nameComplete;
         this.typeCard = typeCard;
@@ -49,7 +61,18 @@ public class Card {
         this.numberCard = numberCard;
         this.cvc = cvc;
         this.validityDate = validityDate;
-        this.isActive = isActive;
+        this.isAuthorized = isAuthorized;
+        this.createAt = LocalDateTime.now();
+        this.updateAt = LocalDateTime.now();
+    }
+    public Card(CardDto data){
+        this.numberCard = data.numberCard();
+        this.cvc = data.cvc();
+        this.nameComplete = data.nameComplete();
+        this.typeIssuer = data.typeIssuer();
+        this.typeCard = data.typeCard();
+        this.validityDate = data.validityDate();
+        this.isAuthorized = data.isActive();
         this.createAt = LocalDateTime.now();
         this.updateAt = LocalDateTime.now();
     }

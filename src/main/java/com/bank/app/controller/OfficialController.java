@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,16 +15,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
+import com.bank.app.usecase.approve.ApproveClientService;
 import com.bank.app.usecase.official.OfficialDto;
 import com.bank.app.usecase.official.OfficialService;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.official.model.Official;
 
 @Controller
@@ -35,14 +34,12 @@ public class OfficialController {
     @Autowired
     private OfficialService officialService;
     @Autowired
-    @Value("${java.hostusers}")
-    private String host;
+    private ApproveClientService approveClientService;
 
     @RolesAllowed("BOSS")
     @PostMapping(value = "/", produces = "application/json")
-    public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data) {
+    public ResponseEntity<?> saveOfficial(@RequestBody OfficialDto data, @RequestHeader("Authorization") String token) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             String code = new BCryptPasswordEncoder().encode(data.getPassword());
             data.setPassword(code);
             Official official = new Official(
@@ -54,27 +51,16 @@ public class OfficialController {
                     data.getAddress());
             Official result = this.officialService.createOfficial(official);
 
-            if(result != null && result.getIsAuthorized()){
-                 Approve approve = new Approve(null,
-                            null,
-                            result.getCpf(),
-                            null,
-                            null,
-                            result.getEmail(),
-                            "official",
-                            false,
-                            false,
-                            null,
-                            null);
-                restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
+            if (result != null) {
+                this.approveClientService.sendToApproveOfficial(result.getCpf(), token);
             }
-
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
+
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     @GetMapping(value = "/cpf/{cpf}")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
@@ -87,6 +73,7 @@ public class OfficialController {
 
         }
     }
+
     @GetMapping(value = "/getAll")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
     public ResponseEntity<?> getAllOfficial() {
@@ -99,6 +86,7 @@ public class OfficialController {
 
         }
     }
+
     @PutMapping(value = "/{cpf}", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> updateByCpf(@PathVariable("cpf") String cpf, @RequestBody OfficialDto data) {

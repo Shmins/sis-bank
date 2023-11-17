@@ -1,6 +1,5 @@
 package com.bank.app.infrastructure.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.bank.app.entity.boss.model.Boss;
 import com.bank.app.entity.boss.repository.BossRepository;
 import com.bank.app.usecase.boss.BossService;
-
 
 @Service
 public class BossServiceImpl implements BossService {
@@ -26,8 +24,9 @@ public class BossServiceImpl implements BossService {
     public void insertMany(Iterable<Boss> boss) {
         this.bossRepository.saveAll(boss);
     }
+
     @Override
-   public void deleteById(String cpf) {
+    public void deleteById(String cpf) {
         this.bossRepository.deleteById(cpf);
     }
 
@@ -44,12 +43,7 @@ public class BossServiceImpl implements BossService {
     }
 
     @Override
-    public List<Boss> getBossByNameComplete(String nameComplete){
-        return this.bossRepository.findByNameComplete(nameComplete);
-    }
-
-    @Override
-   public Boss updateBoss(Boss adm){
+    public Boss updateBoss(Boss adm) {
         return bossRepository.save(adm);
     }
 

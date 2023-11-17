@@ -4,75 +4,60 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.exception.CpfException;
 import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.Address;
+import com.bank.app.entity.user.User;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "official")
-public class Official implements UserDetails {
-    @Id
-    private String cpf;
-
+public class Official extends User {
     private String rg;
-
-    private String nameComplete;
 
     private String email;
 
-    private String password;
-
     private Address address;
-
-    private String role;
 
     private Boolean isAuthorized;
 
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
-
     public Official(String cpf, String rg, String nameComplete, String email, String password,
             Address address) {
+        super(cpf, password, nameComplete, "ROLE_OFFICIAL", LocalDateTime.now(), LocalDateTime.now());
         if (cpf == null || !cpf.matches("\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}")) {
             throw new CpfException("Formato do cpf inválido");
         }
+        if(Boolean.FALSE.equals(super.verifyCpfCode(cpf))){
+            throw new IllegalArgumentException("Cpf com formato errado");
+        }
         if (rg.length() != 11) {
             throw new GenericException("RG com formato inválido");
-
         }
-        this.cpf = cpf;
         this.rg = rg;
-        this.nameComplete = nameComplete;
         this.email = email;
-        this.password = password;
         this.address = address;
-        this.role = "ROLE_OFFICIAL";
         this.isAuthorized = false;
-        this.createAt = LocalDateTime.now();
-        this.updateAt = LocalDateTime.now();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role));
+        return List.of(new SimpleGrantedAuthority(super.getRole()));
     }
 
     @Override
     public String getUsername() {
-        return this.cpf;
+        return super.getCpf();
     }
 
     @Override

@@ -13,7 +13,6 @@ import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuer
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bank.app.entity.client.model.Client;
-import com.bank.app.entity.client.model.cardmodel.Card;
 import com.bank.app.entity.client.repository.ClientRepository;
 
 public class ClientRepositoryImpl implements ClientRepository {
@@ -143,28 +142,13 @@ public class ClientRepositoryImpl implements ClientRepository {
     }
 
     @Override
-    public List<Client> findByEmail(String email) {
-        throw new UnsupportedOperationException("Método não encontrado 'findByEmail'");
-    }
-
-    @Override
-    public List<Client> findByCards(List<Card> cards) {
-        throw new UnsupportedOperationException("Método não encontrado 'findByCards'");
-    }
-
-    @Override
-    public List<Client> findByNameComplete(String nameComplete) {
+    public Client findByNameComplete(String nameComplete) {
         throw new UnsupportedOperationException("Método não encontrado 'findByNameComplete'");
     }
 
     @Override
     public Client findByCard(String number) {
         return this.clientRepository.findByCard(number);
-    }
-
-    @Override
-    public Client findByIdAccount(String id) {
-        throw new UnsupportedOperationException("Unimplemented method 'findByIdAccount'");
     }
 
     @Override

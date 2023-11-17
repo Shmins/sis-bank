@@ -50,12 +50,12 @@ public class AdministratorServiceImpl implements AdministratorService {
     }
 
     @Override
-    public List<Administrator> getAdmByRg(String rg) {
+    public Administrator getAdmByRg(String rg) {
         return this.administratorRepository.findByRg(rg);
     }
 
     @Override
-    public List<Administrator> getAdmByNameComplete(String nameComplete) {
+    public Administrator getAdmByNameComplete(String nameComplete) {
         return this.administratorRepository.findByNameComplete(nameComplete);
     }
 

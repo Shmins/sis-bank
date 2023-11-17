@@ -14,8 +14,7 @@ public interface ClientService {
     Client getClientById(String cpf);
     UserDetails getClientByCpf(String cpf);
     List<Client> getAll();
-    List<Client> getClientByEmail(String email);
-    List<Client> getClientByNameComplete(String nameComplete);
+    Client getClientByNameComplete(String nameComplete);
     Client getCardClient(String number);
     Client updateClient(Client client);
     Client getByIdAccount(String id);

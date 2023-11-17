@@ -49,12 +49,12 @@ public class OfficialServiceImpl implements OfficialService {
     }
 
     @Override
-    public List<Official> getOfficialByRg(String rg) {
+    public Official getOfficialByRg(String rg) {
         return this.officialRepository.findByRg(rg);
     }
 
     @Override
-    public List<Official> getOfficialByNameComplete(String nameComplete) {
+    public Official getOfficialByNameComplete(String nameComplete) {
         return this.officialRepository.findByNameComplete(nameComplete);
     }
 

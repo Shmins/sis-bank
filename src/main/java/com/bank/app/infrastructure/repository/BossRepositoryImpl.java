@@ -135,10 +135,5 @@ public class BossRepositoryImpl implements BossRepository{
     public UserDetails findByCpf(String cpf) {
         throw new UnsupportedOperationException("Unimplemented method 'findByCpf'");
     }
-
-    @Override
-    public List<Boss> findByNameComplete(String nameComplete) {
-        throw new UnsupportedOperationException("Unimplemented method 'findByNameComplete'");
-    }
     
 }

@@ -14,6 +14,11 @@ spring.security.user.name= user
 spring.security.user.password= user
 spring.datasource.secret = ${API_SECRET:shar2122}
 
+
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+eureka.instance.instance-id= ${spring.application.name}:${random.int}
+spring.application.name=sis-bank
+
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
 spring.mail.username= shmins.156@gmail.com
@@ -32,10 +37,12 @@ spring:
         name: sis-bank-api_service
     data:
         mongodb:
-            host: sis-bank-mongo-1
+            host: swiftpay-mongo-1
             port: 27017
             database: sis-bank
-            uri: mongodb://sisbank:sisbank123@sis-bank-mongo-1:27017
+            uri: mongodb://sisbank:sisbank123@swiftpay-mongo-1:27017
+            username: sisbank
+            password: sisbank123
     security:
         user: 
             name: user
@@ -53,3 +60,9 @@ spring:
                     auth: true
                     starttls:
                         enable: true
+eureka:
+    client:
+        service-url:
+            defaultZone: http://swiftpay-eureka-1:8761/eureka
+    instance:
+        instance-id: sis-bank-api_users:${random.int}

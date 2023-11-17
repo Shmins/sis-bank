@@ -1,0 +1,11 @@
+spring:
+    config:
+        activate:
+          on-profile:
+          - test
+    data:
+        mongodb:
+            database: sis-bank-test
+            host: localhost
+            port: 27017
+

@@ -14,8 +14,8 @@ public interface OfficialService {
     Official getOfficialById(String cpf);
     UserDetails getOfficialByCpf(String cpf);
     List<Official> getAll();
-    List<Official> getOfficialByRg(String rg);
-    List<Official> getOfficialByNameComplete(String nameComplete);
+    Official getOfficialByRg(String rg);
+    Official getOfficialByNameComplete(String nameComplete);
     Official updateOfficial(Official official);
     Official findByCpfAfterActive(String cpf);
 }

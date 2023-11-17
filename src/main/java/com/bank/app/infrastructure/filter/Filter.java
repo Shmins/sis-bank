@@ -36,11 +36,10 @@ public class Filter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
       throws ServletException, IOException {
-    String token;
     var authorization = req.getHeader("Authorization");
-
+ 
     if (authorization != null) {
-      token = authorization.replace("Bearer", "");
+      String token = authorization.replace("Bearer", "");
       var subject = this.tokenService.getSubject(token);
       var role = this.tokenService.getIssuer(token);
       
@@ -74,7 +73,7 @@ public class Filter extends OncePerRequestFilter {
           break;
         }
       }
-
+      res.setHeader("Authorization", token);
     }
 
     filterChain.doFilter(req, res);

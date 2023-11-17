@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,19 +17,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
-import com.bank.app.entity.administrator.model.approve.Approve;
 import com.bank.app.entity.client.exception.GenericException;
 import com.bank.app.entity.client.model.Account;
+import com.bank.app.entity.client.model.BorrowingLimit;
 import com.bank.app.entity.client.model.Client;
 
 import com.bank.app.entity.client.model.cardmodel.Card;
-
+import com.bank.app.infrastructure.token.TokenService;
+import com.bank.app.infrastructure.token.TokenUserTdo;
 import com.bank.app.usecase.agency.AccountDto;
-
+import com.bank.app.usecase.approve.ApproveClientService;
+import com.bank.app.usecase.borrowing.BorrowingLimitClientService;
 import com.bank.app.usecase.client.CardDto;
 import com.bank.app.usecase.client.ClientDto;
 import com.bank.app.usecase.client.ClientService;
@@ -43,11 +44,13 @@ import jakarta.annotation.security.RolesAllowed;
 public class ClientController {
     @Autowired
     private ClientService clientService;
-
     @Autowired
-    @Value("${java.hostusers}")
-    private String host;
-    
+    private BorrowingLimitClientService borrowingLimitService;
+    @Autowired
+    private ApproveClientService approveClientService;
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping(value = "/", produces = "application/json")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto data) {
         try {
@@ -58,11 +61,16 @@ public class ClientController {
                     data.getNameComplete(),
                     data.getEmail(),
                     data.getPassword(),
+                    data.getCards(),
                     data.getAccount(),
                     data.getPhone(),
                     data.getAddress());
             Client result = this.clientService.createClient(client);
-
+            if (result != null) {
+                String token = this.tokenService
+                        .token(new TokenUserTdo(client.getCpf(), client.getCpf(), client.getRole()));
+                borrowingLimitService.postBorrowingLimit(new BorrowingLimit(0, 100000), token);
+            }
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -72,58 +80,24 @@ public class ClientController {
 
     @RolesAllowed("CLIENT")
     @PostMapping(value = "/approve/account", produces = "application/json")
-    public ResponseEntity<?> approveAccount(@RequestBody AccountDto data) {
+    public ResponseEntity<?> approveAccount(@RequestBody AccountDto data,
+            @RequestHeader("Authorization") String token) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Account account = new Account(data.getTypeAccount(), null, client.getCpf());
+            Account account = new Account(null, null, data.getTypeAccount(), null, client.getCpf(), null, null);
+            this.approveClientService.sendToApproveAccount(account, token);
 
-            Approve result = new Approve(null,
-                            null,
-                            client.getCpf(),
-                            account,
-                            null,
-                            null,
-                            "account",
-                            false,
-                            false,
-                            null,
-                            null);
-            restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), result);
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.valueOf(500));
         }
     }
 
-    @PostMapping(value = "/account/{cpf}", produces = "application/json")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS')")
-    public ResponseEntity<?> createAccount(@RequestBody AccountDto data, @PathVariable("cpf") String cpf) {
-        try {
-            Client client = this.clientService.getClientById(cpf);
-            if (client.getAccount().size() == client.getAccountLimit()) {
-                throw new IllegalArgumentException("Máximo de contas alcançado");
-            }
-            Account account = new Account(data.getTypeAccount(), data.getNumberAgency(), client.getCpf());
-            List<Account> ac = client.getAccount();
-            ac.add(account);
-            client.setAccount(ac);
-
-            this.clientService.updateClient(client);
-            return new ResponseEntity<>(HttpStatus.valueOf(200));
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
-
-        }
-    }
-
     @PostMapping(value = "/cards/add", produces = "application/json")
     @RolesAllowed("CLIENT")
-    public ResponseEntity<?> saveCards(@RequestBody Card data) {
+    public ResponseEntity<?> saveCards(@RequestBody Card data, @RequestHeader("Authorization") String token) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (client.getCards().size() == 6) {
                 throw new GenericException("limite de cartões exedido");
@@ -138,20 +112,9 @@ public class ClientController {
 
             client.setCards(cards);
             Client update = this.clientService.updateClient(client);
-            if (update != null && Boolean.FALSE.equals(data.isActive())) {
-                Approve approve = new Approve(null,
-                                null,
-                                client.getCpf(),
-                                null,
-                                data,
-                                null,
-                                "cards",
-                                false,
-                                false,
-                                null,
-                                null);
-            restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
-            }
+
+            this.approveClientService.sendToApproveCard(data.getNumberCard(), token);
+
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
 
         } catch (Exception e) {
@@ -162,14 +125,13 @@ public class ClientController {
 
     @PostMapping(value = "/account/cards/{id}", produces = "application/json")
     @RolesAllowed("CLIENT")
-    public ResponseEntity<?> saveCardsAccount(@PathVariable("id") String id, @RequestBody Card data) {
+    public ResponseEntity<?> saveCardsAccount(@PathVariable("id") String id, @RequestBody Card data,
+            @RequestHeader("Authorization") String token) {
         try {
             Client client = (Client) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            RestTemplate restTemplate = new RestTemplate();
 
             List<Account> accounts = client.getAccount();
-            Account account = accounts.stream().filter(res -> res.getId().equals(id)).toList().get(0);
-            List<Card> cards = account.getCards();
+            List<Card> cards = accounts.stream().filter(res -> res.getId().equals(id)).toList().get(0).getCards();
             if (cards.size() == 2) {
                 throw new GenericException("limite de cartões exedido");
             }
@@ -178,28 +140,12 @@ public class ClientController {
                     throw new IllegalArgumentException("Número de cartão ou CVC duplicado");
                 }
             }
-
             cards.add(data);
-            accounts.remove(account);
-            account.setCards(cards);
-            accounts.add(account);
             client.setAccount(accounts);
             Client update = this.clientService.updateClient(client);
-            if (update != null && data.isActive()) {
-                Approve approve = new Approve(null,
-                        null,
-                        client.getCpf(),
-                        null,
-                        data,
-                        null,
-                        "cards",
-                        false,
-                        false,
-                        null,
-                        null);
-                restTemplate.postForLocation(String.format("http:%s/approve/v1/", host), approve);
-               
-            }
+
+            this.approveClientService.sendToApproveCard(data.getNumberCard(), token);
+
             return new ResponseEntity<>(update, HttpStatus.valueOf(200));
 
         } catch (Exception e) {
@@ -292,25 +238,23 @@ public class ClientController {
         }
     }
 
-    @GetMapping(value = "/cpf/{cpf}")
+    @GetMapping(value = "/{cpf}")
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<?> getById(@PathVariable("cpf") String cpf) {
         try {
             Client clients = this.clientService.getClientById(cpf);
 
-            return new ResponseEntity<>(clients, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
-
-        }
-    }
-
-    @GetMapping(value = "/email/{email}")
-    @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
-    public ResponseEntity<?> getByEmail(@PathVariable("email") String email) {
-        try {
-            List<Client> clients = this.clientService.getClientByEmail(email);
-            return new ResponseEntity<>(clients, HttpStatus.OK);
+            return new ResponseEntity<>(new ClientDto(
+                clients.getCpf(),
+                 clients.getNameComplete(),
+                  clients.getEmail(),
+                    clients.getPassword(),
+                    clients.getCards(),
+                     clients.getAccount(),
+                     clients.getPhone(),
+                      clients.getAddress(),
+                    clients.getAccountLimit(),
+                     clients.getRole()), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));
 
@@ -321,7 +265,7 @@ public class ClientController {
     @PreAuthorize("hasRole('ROLE_ADM') or hasRole('ROLE_BOSS') or hasRole('ROLE_OFFICIAL')")
     public ResponseEntity<?> getByNameComplete(@PathVariable("nameComplete") String nameComplete) {
         try {
-            List<Client> clients = this.clientService.getClientByNameComplete(nameComplete);
+            Client clients = this.clientService.getClientByNameComplete(nameComplete);
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.valueOf(500));

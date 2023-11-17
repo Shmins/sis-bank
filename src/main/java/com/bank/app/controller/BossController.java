@@ -78,7 +78,6 @@ public class BossController {
     public ResponseEntity<?> updateBossById(@PathVariable("cpf") String cpf, @RequestBody BossDto data) {
         try {
             Boss boss = this.bossService.getBossById(cpf);
-
             boss.setNameComplete(
                     data.getNameComplete() != null ? data.getNameComplete() : boss.getNameComplete());
             boss.setPassword(data.getPassword() != null ? new BCryptPasswordEncoder().encode(data.getPassword())

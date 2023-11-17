@@ -20,18 +20,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 
 import com.bank.app.infrastructure.filter.Filter;
 
 @Configuration
+@Component
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true)
 public class Configurations {
 
     @Autowired
     private Filter filter;
-
     @Autowired
     @Value("${spring.mail.username}")
     private String username;
@@ -63,13 +64,14 @@ public class Configurations {
                 .cors(res -> res.configurationSource(req -> {
                     var cors = new CorsConfiguration();
                     cors.setAllowedOrigins(
-                            List.of("http://10.14.10.189:3000", "http://localhost:3000", "http://localhost:8081"));
+                            List.of("http://localhost:5001"));
                     cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                     cors.setAllowedHeaders(List.of("*"));
                     return cors;
                 }));
         return http.build();
     }
+   
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
@@ -89,7 +91,7 @@ public class Configurations {
         mailSender.setPort(Integer.parseInt(port));
 
         mailSender.setUsername(username);
-        mailSender.setPassword(password);
+         mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

@@ -137,12 +137,12 @@ public class OfficialRepositoryImpl implements OfficialRepository{
     }
 
     @Override
-    public List<Official> findByRg(String rg) {
+    public Official findByRg(String rg) {
         throw new UnsupportedOperationException("Unimplemented method 'findByRg'");
     }
 
     @Override
-    public List<Official> findByNameComplete(String nameComplete) {
+    public Official findByNameComplete(String nameComplete) {
         throw new UnsupportedOperationException("Unimplemented method 'findByNameComplete'");
     }
     
