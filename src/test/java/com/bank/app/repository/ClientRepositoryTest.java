@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,83 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClientRepositoryTest {
     @Autowired
     ClientRepository clientRepository;
+    private Client client;
 
-    @Test
-    @DisplayName("Get User successfully")
-    void findByCpfCase1() {
-        Client client = getClient();
-
-        this.clientRepository.save(client);
-
-        UserDetails data = this.clientRepository.findByCpf(client.getCpf());
-
-        assertThat(data).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Get User failed")
-    void findByCpfCase2() {
-
-        UserDetails data = this.clientRepository.findByCpf("000.000.000-00");
-
-        assertThat(data).isNull();
-    }
-
-   
-    @Test
-    @DisplayName("Get client by name complete successfully")
-    void findByNameCompleteCase1() {
-
-        Client data = this.clientRepository.findByNameComplete(getClient().getNameComplete());
-
-        assertThat(data).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Get client by name complete failed")
-    void findByNameCompleteCase2() {
-
-        Client data = this.clientRepository.findByNameComplete("break");
-
-        assertThat(data).isNull();
-    }
-    @Test
-    @DisplayName("Get account successfully")
-    void findByAccountCase1() {
-        String id = getClient().getAccount().get(0).getId();
-        Client data = this.clientRepository.findByAccount(id);
-
-        assertThat(data).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Get client account failed")
-    void findByAccountCase2() {
-
-        Client data = this.clientRepository.findByAccount(UUID.randomUUID().toString());
-
-        assertThat(data).isNull();
-    }
-    @Test
-    @DisplayName("Get card successfully")
-    void findByCardCase1() {
-
-        Client data = this.clientRepository.findByCard(getClient().getCards().get(0).getNumberCard());
-
-        assertThat(data).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Get card failed")
-    void findByCardCase2() {
-
-        Client data = this.clientRepository.findByCard("0000 0000 0000 0000");
-
-        assertThat(data).isNull();
-    }
-
-    private Client getClient() {
-        Client client = new Client();
+    @BeforeEach
+    void setup() {
+        client = new Client();
         client.setCpf("096.879.823-30");
         client.setNameComplete("Pedro Alyson Teixeira dos Santos");
         client.setEmail("pedro.123@gmail.com");
@@ -127,8 +56,80 @@ class ClientRepositoryTest {
                 LocalDateTime.now()));
         client.setPhone(new Phone());
         client.setAddress(new Address());
-        
-        return client;
+    }
+
+    @Test
+    @DisplayName("Get User successfully")
+    void findByCpfCase1() {
+
+        this.clientRepository.save(client);
+
+        UserDetails data = this.clientRepository.findByCpf(client.getCpf());
+
+        assertThat(data).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Get User failed")
+    void findByCpfCase2() {
+
+        UserDetails data = this.clientRepository.findByCpf("000.000.000-00");
+
+        assertThat(data).isNull();
+    }
+
+    @Test
+    @DisplayName("Get client by name complete successfully")
+    void findByNameCompleteCase1() {
+
+        Client data = this.clientRepository.findByNameComplete(client.getNameComplete());
+
+        assertThat(data).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Get client by name complete failed")
+    void findByNameCompleteCase2() {
+
+        Client data = this.clientRepository.findByNameComplete("break");
+
+        assertThat(data).isNull();
+    }
+
+    @Test
+    @DisplayName("Get account successfully")
+    void findByAccountCase1() {
+        String id = client.getAccount().get(0).getId();
+        Client data = this.clientRepository.findByAccount(id);
+
+        assertThat(data).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Get client account failed")
+    void findByAccountCase2() {
+
+        Client data = this.clientRepository.findByAccount(UUID.randomUUID().toString());
+
+        assertThat(data).isNull();
+    }
+
+    @Test
+    @DisplayName("Get card successfully")
+    void findByCardCase1() {
+
+        Client data = this.clientRepository.findByCard(client.getCards().get(0).getNumberCard());
+
+        assertThat(data).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Get card failed")
+    void findByCardCase2() {
+
+        Client data = this.clientRepository.findByCard("0000 0000 0000 0000");
+
+        assertThat(data).isNull();
     }
 
     private List<Card> createCards(String numberCard, Integer cvc, String typeCard, String nameComplete,
